@@ -1,0 +1,37 @@
+{
+  "name": "robertkleinschuster/compass",
+  "description": "A Component Router for PHP",
+  "type": "library",
+  "license": "MIT",
+  "version": "v0.0.1",
+  "authors": [
+    {
+      "name": "Robert Kleinschuster",
+      "email": "github@robs.social",
+      "homepage": "https://www.robs.social",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "robertkleinschuster/mosaic": "v0.0.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Compass\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CompassTest\\": "tests"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.4.1",
+    "phpstan/phpstan": "^1.10.21"
+  },
+  "scripts": {
+    "phpunit": "phpunit tests",
+    "phpstan": "phpstan analyse src --level 6"
+  }
+}
