@@ -39,54 +39,24 @@ readonly class Page implements Renderable
     public function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
     {
         if (isset($partial) && ($partial === '.' || !str_starts_with($route->getName(), $partial))) {
-            $children = $this->renderReactive($route, $children);
-        } else {
-            $children = $this->renderAttributes($route, $children, $partial);
+            return $children;
+        }
 
-            if ($route->hasLayout()) {
-                $layout = require $route->getLayout();
-                $layout = $this->renderAttributes($route, $layout, $partial);
-                $children = $renderer->render($layout, $renderer->args([
-                    ...$args,
-                    'children' => $renderer->render($children, $renderer->args($args)),
-                    'route' => $route
-                ]));
-            }
+        if ($route->hasLayout()) {
+            $layout = require $route->getLayout();
+            $children = $renderer->render($layout, $renderer->args([
+                ...$args,
+                'children' => $renderer->render($children, $renderer->args($args)),
+                'route' => $route
+            ]));
+        }
 
-            $parent = $route->getParent();
-            if ($parent) {
-                return $this->renderLayout($renderer, $parent, $children, $args, $partial);
-            }
+        $parent = $route->getParent();
+        if ($parent) {
+            return $this->renderLayout($renderer, $parent, $children, $args, $partial);
         }
 
         return $children;
-    }
-
-    private function renderAttributes(Route $route, mixed $view, ?string $partial): mixed
-    {
-        if (isset($partial)) {
-            return $this->renderReactive($route, $view);
-        } else {
-            return $this->renderReactive($route, $this->renderLazy($route, $view));
-        }
-    }
-
-    private function renderLazy(Route $route, mixed $view): mixed
-    {
-        $attribute = (new Attribute())->getLazy($view);
-        if ($attribute) {
-            return new Boundary($this->uri, $route->getPath(), children: $attribute->loading, fetchOnConnected: true);
-        }
-        return $view;
-    }
-
-    private function renderReactive(Route $route, mixed $view): mixed
-    {
-        $attribute = (new Attribute())->getReactive($view);
-        if ($attribute) {
-            return new Boundary($this->uri, $route->getPath(), children: $view, fetchOnConnected: false);
-        }
-        return $view;
     }
 
     /**
@@ -96,13 +66,15 @@ readonly class Page implements Renderable
      * @throws RenderException
      * @throws Throwable
      */
-    public function render(Renderer $renderer, $data = null): iterable
+    public function render(Renderer $renderer, $data): iterable
     {
         try {
             $partial = $this->queryParams[self::PARTIAL_PARAM] ?? null;
 
             $args = new Arguments($data ?? []);
             $args['route'] = $this->route;
+            $args['partial'] = $partial;
+            $args['uri'] = $this->uri;
             $args['params'] = $this->params;
             $args['queryParams'] = $this->queryParams;
 

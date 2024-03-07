@@ -6,7 +6,7 @@ namespace Compass;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_FUNCTION | Attribute::TARGET_CLASS)]
-class Reactive
+#[Attribute(Attribute::TARGET_FUNCTION)]
+class Reactive extends Boundary
 {
 }

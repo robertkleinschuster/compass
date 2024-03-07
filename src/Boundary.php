@@ -4,43 +4,42 @@ declare(strict_types=1);
 
 namespace Compass;
 
-use Mosaic\Renderable;
+use Attribute;
+use Mosaic\RenderableAttribute;
 use Mosaic\Renderer;
 
-class Boundary implements Renderable
+#[Attribute]
+class Boundary implements RenderableAttribute
 {
-    public function __construct(
-        private string $uri,
-        private string $route,
-        private mixed  $children = null,
-        private bool   $fetchOnConnected = false
-    )
+    public function render(Renderer $renderer, mixed $children, mixed $data)
     {
+        yield $renderer->fragment(sprintf(
+            '<route-boundary %s>',
+            implode(' ', $this->buildAttributes($data))
+        ));
+        yield $children;
+        yield $renderer->fragment('</route-boundary>');
     }
 
-    public function render(Renderer $renderer, mixed $data = null): iterable
+    protected function buildAttributes(mixed $data): array
     {
-        if (isset($data['children'])) {
-            $partial = $this->route;
+        if (isset($data['children']) && isset($data['route'])) {
+            $partial = $data['route'];
         } else {
             $partial = '.';
         }
 
         $attributes = [];
-        $attributes[] = sprintf('uri="%s"', $this->uri);
-        $attributes[] = sprintf('route="%s"', $this->route);
+        if (isset($data['uri'])) {
+            $attributes[] = sprintf('uri="%s"', $data['uri']);
+        }
+
+        if (isset($data['route'])) {
+            $attributes[] = sprintf('route="%s"', $data['route']);
+        }
+
         $attributes[] = sprintf('partial="%s"', $partial);
 
-        if ($this->fetchOnConnected) {
-            $attributes[] = 'fetch-on-connected';
-        }
-
-        yield $renderer->fragment(sprintf('<route-boundary %s>', implode(' ', $attributes)));
-
-        if (isset($this->children)) {
-            yield $this->children;
-        }
-
-        yield $renderer->fragment('</route-boundary>');
+        return $attributes;
     }
 }
