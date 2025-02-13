@@ -3,10 +3,14 @@
 declare(strict_types=1);
 
 use Mosaic\Fragment;
-use Compass\Lazy;
-use Compass\Reactive;
 
-return #[Reactive] #[Lazy] function () {
+return #[\Compass\Attributes\Lazy('Loading...')] #[\Compass\Attributes\Reactive] #[\Compass\Attributes\PageMeta('de', 'About', '')] function () {
     yield new Fragment('<h2>about!</h2>');
-    yield new Fragment('<a href="/1/2/3/4">link</a>');
+    yield new Fragment('<a href="/">root</a>');
+    yield new Fragment('<a href="/about">about</a>');
+    yield new Fragment('<a href="/about/test">about test</a>');
+    yield new Fragment('<a href="/about/test2">about test 2</a>');
+    yield new Fragment('<a href="/imprint">imprint</a>');
+    yield new Fragment('<a href="/imprint/test">imprint test</a>');
+    yield new Fragment('<a href="/imprint/test2">imprint test 2</a>');
 };

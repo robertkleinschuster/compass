@@ -18,8 +18,8 @@ class PageTest extends TestCase
         $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null);
 
         $renderer = new Renderer();
-        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], [], false));
-        $this->assertEquals('<root><sub id="/sub"><child id="1">page 1 /sub/child</child></sub></root>', (string)$result);
+        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
+        $this->assertStringContainsString('<root><sub><child id="1">page 1 /sub/child</child></sub></root>', (string)$result);
     }
 
     public function testRenderNoLayout()
@@ -27,8 +27,8 @@ class PageTest extends TestCase
         $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', null, null);
 
         $renderer = new Renderer();
-        $result = $renderer->render(new Page($root, '/sub/child', ['id' => '1'], [], false));
-        $this->assertEquals('page 1', $result);
+        $result = $renderer->render(new Page($root, '/sub/child', ['id' => '1'], []));
+        $this->assertStringContainsString('page 1', (string)$result);
     }
 
     public function testRenderPartial()
@@ -40,16 +40,16 @@ class PageTest extends TestCase
         $renderer = new Renderer();
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '.']));
-        $this->assertEquals('page 1 /sub/child', (string)$result);
+        $this->assertStringContainsString('<template data-title="">page 1 /sub/child</template>', (string)$result);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub/child']));
-        $this->assertEquals('<child id="1">page 1 /sub/child</child>', (string)$result);
+        $this->assertStringContainsString('<template data-title=""><child id="1">page 1 /sub/child</child></template>', (string)$result);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub']));
-        $this->assertEquals('<sub id="/sub"><child id="1">page 1 /sub/child</child></sub>', (string)$result);
+        $this->assertStringContainsString('<template data-title=""><sub><child id="1">page 1 /sub/child</child></sub></template>', (string)$result);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/']));
-        $this->assertEquals('<root><sub id="/sub"><child id="1">page 1 /sub/child</child></sub></root>', (string)$result);
+        $this->assertStringContainsString('<template data-title=""><root><sub><child id="1">page 1 /sub/child</child></sub></root></template>', (string)$result);
     }
 
     public function testRenderLazy()
@@ -60,20 +60,20 @@ class PageTest extends TestCase
 
         $renderer = new Renderer();
 
-        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], [], false));
-        $this->assertEquals('<root><route-boundary uri="/sub/child" route="/sub" partial="/sub" fetch-on-connected></route-boundary></root>', (string)$result);
+        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
+        $this->assertStringContainsString('<root><sub><child id="1"><route-boundary partial="." fetch-on-connected></route-boundary></child></sub></root>', (string)$result);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub']));
-        $this->assertEquals('<sub id="/sub"><child id="1">page 1 /sub/child</child></sub>', (string)$result);
+        $this->assertStringContainsString('<template data-title=""><sub><child id="1">page 1 /sub/child</child></sub></template>', (string)$result);
 
         $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null);
         $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', null, null);
         $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null);
 
-        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], [], false));
-        $this->assertEquals('<root><child id="1"><route-boundary uri="/sub/child" route="/sub/child" partial="." fetch-on-connected></route-boundary></child></root>', (string)$result);
+        $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
+        $this->assertStringContainsString('<root><child id="1"><route-boundary partial="." fetch-on-connected></route-boundary></child></root>', (string)$result);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '.']));
-        $this->assertEquals('page 1 /sub/child', (string)$result);
+        $this->assertStringContainsString('<template data-title="">page 1 /sub/child</template>', (string)$result);
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Compass;
 
+use Compass\Attributes\Boundary;
+
 class RouteCollector
 {
     public const PAGE_FILENAME = 'page.php';
@@ -22,32 +24,25 @@ class RouteCollector
             if ($routes) {
                 $this->routes = $routes;
             } else {
-                $scanner = new DirectoryScanner(self::PAGE_FILENAME, self::LAYOUT_FILENAME, self::ACTION_FILENAME);
-                $this->routes = $scanner->scan($this->directory);
-                $this->cache->save($this->routes);
+                $this->routes = $this->findRoutes();
+                $this->buildCache();
             }
         } else {
-            $scanner = new DirectoryScanner(self::PAGE_FILENAME, self::LAYOUT_FILENAME, self::ACTION_FILENAME);
-            $this->routes = $scanner->scan($this->directory);
+            $this->routes = $this->findRoutes();
         }
     }
 
     public function buildCache(): void
     {
-        if ($this->cache) {
-            $scanner = new DirectoryScanner(self::PAGE_FILENAME, self::LAYOUT_FILENAME, self::ACTION_FILENAME);
-            $this->cache->save($scanner->scan($this->directory));
-        }
+        $this->cache?->save($this->routes);
     }
 
-    /**
-     * @deprecated
-     * @see self::buildCache()
-     * @return void
-     */
-    public function clearCache(): void
+    private function findRoutes(): array
     {
-        $this->buildCache();
+        $scanner = new DirectoryScanner(self::PAGE_FILENAME, self::LAYOUT_FILENAME, self::ACTION_FILENAME);
+        $routes = $scanner->scan($this->directory);
+        $routes[] = new Route(Boundary::SCRIPT_PATH, null, __DIR__ . '/Templates/client-router.js.php', null, null);
+        return $routes;
     }
 
     /**

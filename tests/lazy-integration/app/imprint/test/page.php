@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Compass\Attributes\PageMeta;
 use Mosaic\Fragment;
 
-return #[PageMeta('de', 'Hello world!', '')] #[\Compass\Attributes\Reactive] function () {
+return #[\Compass\Attributes\Lazy] #[\Compass\Attributes\Reactive] #[\Compass\Attributes\PageMeta('de', 'imprint', '')] function () {
+    yield new Fragment('<h2>imprint! 2</h2>');
     yield new Fragment('<a href="/">root</a>');
     yield new Fragment('<a href="/about">about</a>');
     yield new Fragment('<a href="/about/test">about test</a>');
@@ -13,4 +13,5 @@ return #[PageMeta('de', 'Hello world!', '')] #[\Compass\Attributes\Reactive] fun
     yield new Fragment('<a href="/imprint">imprint</a>');
     yield new Fragment('<a href="/imprint/test">imprint test</a>');
     yield new Fragment('<a href="/imprint/test2">imprint test 2</a>');
+
 };

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Compass;
+namespace Compass\Attributes;
 
 use Attribute;
 use Mosaic\RenderableAttribute;
@@ -11,6 +11,8 @@ use Mosaic\Renderer;
 #[Attribute]
 class Boundary implements RenderableAttribute
 {
+    public const SCRIPT_PATH = '/.client-router.js';
+
     public function render(Renderer $renderer, mixed $children, mixed $data)
     {
         yield $renderer->fragment(sprintf(

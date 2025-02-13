@@ -2,20 +2,17 @@
 
 declare(strict_types=1);
 
+use Compass\Attributes\Header;
+use Compass\Attributes\Resource;
 use Mosaic\Fragment;
 
-return new Fragment(<<<HTML
-<script>
+return #[Header('Content-Type', 'text/javascript')] #[Resource] fn() => new Fragment(<<<JS
 window.history.replaceState({url: document.location.href}, null, document.location.href);
 window.addEventListener('popstate', event => {
     window.location.assign(event.state.url);
 })
-
+if (!customElements.get('route-boundary')) {
 customElements.define('route-boundary', class extends HTMLElement {
-    uri = this.getAttribute('uri');
-    route = this.getAttribute('route');
-    partial = this.getAttribute('partial');
-     
     handleClick = event => {
          const link = event.target.matches('a') ? event.target : event.target.closest('a');
             if (link && (!link.target || link.target === '_self')) {
@@ -50,7 +47,7 @@ customElements.define('route-boundary', class extends HTMLElement {
                         window.location.assign(response.url);
                     }
                 } else {
-                    this.fetch(this.uri, false);
+                    this.fetch(window.location.href, false);
                 }
             }).catch(error => {
                 console.error(error);
@@ -66,25 +63,73 @@ customElements.define('route-boundary', class extends HTMLElement {
 
     connectedCallback() {
         if (this.hasAttribute('fetch-on-connected')) {
-            this.fetch(this.uri, false, false);
+            this.fetch(window.location.href, false, false);
         }
+    }
+    
+    removeLastPathSegment(path) {
+        if (path === '/') {
+            return '/';
+        }
+        const segments = path.split('/')
+        segments.pop()
+        const newPath = segments.join('/')
+        if (!newPath.length) {
+            return '/'
+        }
+        return newPath
     }
     
     canFetch(url) {
         const currentURL = new URL(window.location.href);
-        const urlObject = new URL(url, document.baseURI);
-        return urlObject.host === currentURL.host && urlObject.pathname.startsWith(this.route);
+        const requestedURL = new URL(url, document.baseURI);
+        const requestedBase = this.removeLastPathSegment(requestedURL.pathname)
+        return requestedURL.host === currentURL.host && requestedBase.startsWith(this.getAttribute('partial'));
     }
         
+    loadStyle(href) {
+        if (!document.querySelector(`link[href='\${href}']`)) {
+            const style = document.createElement('link');
+            style.rel = 'stylesheet';
+            style.href = href;
+            document.head.appendChild(style);
+        }
+    }
+    
+    loadScript(src) {
+          if (!document.querySelector(`script[src='\${src}']`)) {
+              const script = document.createElement('script');
+              script.src = src;
+              document.head.appendChild(script)
+        }
+    }
+    
     fetch(url, history, fallback = true) {
-          const urlObject = new URL(url, document.baseURI);
-          urlObject.searchParams.set('_partial', this.partial);
-          fetch(urlObject)
+          const requestedURL = new URL(url, document.baseURI);
+          requestedURL.searchParams.set('_partial', this.getAttribute('partial'));
+          fetch(requestedURL)
             .then(response => response.text())
             .then(htmlString => {
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = htmlString;
-                this.replaceWith(...wrapper.childNodes);
+                const template = wrapper.querySelector('template')
+                if (wrapper.querySelector('script')) {
+                    const data = JSON.parse(wrapper.querySelector('script').innerText)
+                     document.head.querySelectorAll('script[src]').forEach(script => {
+                         if (!script.src.endsWith('.client-router.js')) {
+                             script.remove()
+                         }
+                     });
+                    if (Array.isArray(data.scripts)) {
+                       data.scripts.forEach(this.loadScript)
+                    }
+                    document.head.querySelectorAll('link[rel=stylesheet]').forEach(style =>  style.remove())
+                    if (Array.isArray(data.styles)) {
+                       data.styles.forEach(this.loadStyle)
+                    }
+                }
+                document.title = template.dataset.title
+                this.replaceWith(template.content);
                 if (history) {
                     window.history.pushState({url: url}, null, url);
                 }
@@ -100,6 +145,6 @@ customElements.define('route-boundary', class extends HTMLElement {
             });
     }
 })
-</script>
-HTML
+}
+JS
 );

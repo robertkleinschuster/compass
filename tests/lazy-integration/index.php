@@ -2,20 +2,24 @@
 
 declare(strict_types=1);
 
+use Compass\RouteCollector;
 use Mosaic\Renderer;
 use Compass\Page;
-use Compass\Route;
 
 ini_set('display_errors', 1);
 
-require "../../vendor/autoload.php";
+require "vendor/autoload.php";
 
-$root = new Route('/', null, __DIR__ . '/app/page.php', __DIR__ . '/app/layout.php', null);
-$about = new Route('/1/2/3/4', $root, __DIR__ . '/app/about/page.php', __DIR__ . '/app/about/layout.php', null);
-
-$page = new Page($about, $_SERVER['REQUEST_URI'] . '?' . http_build_query($_GET), [], $_GET);
-$renderer = new Renderer();
-echo $renderer->render($page);
-
-
-
+$routeCollector = new RouteCollector(__DIR__ . '/app');
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+foreach ($routeCollector->getRoutes() as $route) {
+    if ($route->getPath() === $path) {
+        $page = new Page($route, $_SERVER['REQUEST_URI'] . '?' . http_build_query($_GET), [], $_GET);
+        foreach ($page->getHeaders() as $header) {
+            header(sprintf('%s: %s', $header->getName(), $header->getValue()));
+        }
+        $renderer = new Renderer();
+        echo $renderer->render($page);
+        break;
+    }
+}

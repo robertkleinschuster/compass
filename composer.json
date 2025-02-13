@@ -32,6 +32,10 @@
   },
   "scripts": {
     "phpunit": "phpunit tests",
-    "phpstan": "phpstan analyse src --level 6"
+    "phpstan": "phpstan analyse src --level 6",
+    "dev": [
+      "Composer\\Config::disableProcessTimeout",
+      "php -S localhost:8080 -t tests/lazy-integration tests/lazy-integration/index.php"
+    ]
   }
 }
