@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Compass;
 
-use Compass\Attributes\Boundary;
+use Compass\Templates\Boundary;
 
 class RouteCollector
 {
     public const PAGE_FILENAME = 'page.php';
     public const LAYOUT_FILENAME = 'layout.php';
     public const ACTION_FILENAME = 'action.php';
+    private const SCRIPT_FILENAME = 'script.js';
+    private const STYLESHEET_FILENAME = 'styles.css';
 
     /**
      * @var Route[]
@@ -39,9 +41,23 @@ class RouteCollector
 
     private function findRoutes(): array
     {
-        $scanner = new DirectoryScanner(self::PAGE_FILENAME, self::LAYOUT_FILENAME, self::ACTION_FILENAME);
+        $scanner = new DirectoryScanner(
+            pageFilename: self::PAGE_FILENAME,
+            layoutFilename: self::LAYOUT_FILENAME,
+            actionFilename: self::ACTION_FILENAME,
+            stylesheetFilename: self::STYLESHEET_FILENAME,
+            scriptFilename: self::SCRIPT_FILENAME
+        );
         $routes = $scanner->scan($this->directory);
-        $routes[] = new Route(Boundary::SCRIPT_PATH, null, __DIR__ . '/Templates/client-router.js.php', null, null);
+        $routes[] = new Route(
+            substr(Boundary::SCRIPT_PATH, 0, strlen(Boundary::SCRIPT_PATH) - 3),
+            null,
+            null,
+            null,
+            null,
+            null,
+            __DIR__ . '/Templates/client-router.js'
+        );
         return $routes;
     }
 

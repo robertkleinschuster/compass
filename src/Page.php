@@ -11,6 +11,7 @@ use Compass\Attributes\PageScript;
 use Compass\Attributes\PageStyle;
 use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
+use Compass\Exception\InvalidPageRouteException;
 use Compass\Exception\InvalidPartialException;
 use Compass\Templates\Boundary;
 use Compass\Templates\Document;
@@ -35,9 +36,13 @@ readonly class Page implements Renderable
      * @param string $uri
      * @param array<string, string> $params
      * @param array<string, mixed> $queryParams
+     * @throws InvalidPageRouteException
      */
     public function __construct(private Route $route, private string $uri, private array $params, private array $queryParams)
     {
+        if ($this->route->getPage() === null) {
+            throw new InvalidPageRouteException(sprintf('Route with path `%s` has no page.', $this->route->getPath()));
+        }
         $this->attributeHelper = new AttributeHelper();
         $this->page = require $this->route->getPage();
     }
@@ -109,6 +114,9 @@ readonly class Page implements Renderable
     {
         $scripts = $this->attributeHelper->getAttributes($this->page, PageScript::class);
         $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
+        if ($this->route->getScript() !== null) {
+            $scripts[] = new PageScript($this->route->getPath() . '.js');
+        }
         return $scripts;
     }
 
@@ -118,7 +126,11 @@ readonly class Page implements Renderable
      */
     public function getStyles(): array
     {
-        return $this->attributeHelper->getAttributes($this->page, PageStyle::class);
+        $styles = $this->attributeHelper->getAttributes($this->page, PageStyle::class);
+        if ($this->route->getStylesheet() !== null) {
+            $styles[] = new PageStyle($this->route->getPath() . '.css');
+        }
+        return $styles;
     }
 
     public function isResource(): bool

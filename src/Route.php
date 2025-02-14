@@ -13,9 +13,11 @@ final class Route implements Stringable
     public function __construct(
         private readonly string  $path,
         private readonly ?Route  $parent,
-        private readonly string  $page,
+        private readonly ?string $page,
         private readonly ?string $layout,
-        private readonly ?string $action
+        private readonly ?string $action,
+        private readonly ?string $stylesheet,
+        private readonly ?string $script
     )
     {
     }
@@ -31,7 +33,9 @@ final class Route implements Stringable
             parent: $data['parent'],
             page: $data['page'],
             layout: $data['layout'],
-            action: $data['action']
+            action: $data['action'],
+            stylesheet: $data['stylesheet'],
+            script: $data['script'],
         );
     }
 
@@ -55,7 +59,7 @@ final class Route implements Stringable
         return $this->path;
     }
 
-    public function getPage(): string
+    public function getPage(): ?string
     {
         return $this->page;
     }
@@ -78,6 +82,16 @@ final class Route implements Stringable
     public function getAction(): ?string
     {
         return $this->action;
+    }
+
+    public function getStylesheet(): ?string
+    {
+        return $this->stylesheet;
+    }
+
+    public function getScript(): ?string
+    {
+        return $this->script;
     }
 
     public function __toString(): string

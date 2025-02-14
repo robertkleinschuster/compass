@@ -11,8 +11,8 @@ class RouteTest extends TestCase
 {
     public function testShouldRestorableFromVarExport()
     {
-        $startpage = new Route('/', null, '', 'test', null);
-        $about = new Route('/about', $startpage, '', null, null);
+        $startpage = new Route('/', null, '', 'test', null, null, null);
+        $about = new Route('/about', $startpage, '', null, null, null, null);
 
         /** @var $startpageRestored Route */
         eval('$startpageRestored = ' . var_export($startpage, true) . ';');

@@ -19,7 +19,7 @@ class RoutesCacheTest extends TestCase
 
     public function testShouldSaveAndLoadRoutes()
     {
-        $route = new Route( '/', null, '', null, null);
+        $route = new Route( '/', null, '', null, null, null, null);
         $cache = new RoutesCache(__DIR__ . '/routes-cache.php');
         $cache->save([$route]);
         $routes = $cache->load();
