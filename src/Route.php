@@ -17,9 +17,13 @@ final class Route implements Stringable
         private readonly ?string $layout,
         private readonly ?string $action,
         private readonly ?string $stylesheet,
-        private readonly ?string $script
+        private readonly ?string $script,
+        private readonly ?PageInfo $pageInfo
     )
     {
+        if ($this->pageInfo !== null && $this->parent?->getPageInfo() !== null) {
+            $this->pageInfo->setParent($this->parent->getPageInfo());
+        }
     }
 
     /**
@@ -36,6 +40,7 @@ final class Route implements Stringable
             action: $data['action'],
             stylesheet: $data['stylesheet'],
             script: $data['script'],
+            pageInfo: $data['pageInfo'],
         );
     }
 
@@ -102,6 +107,11 @@ final class Route implements Stringable
     public function getStylesheetPath(): string
     {
         return $this->getPath() . '.css';
+    }
+
+    public function getPageInfo(): ?PageInfo
+    {
+        return $this->pageInfo;
     }
 
     public function __toString(): string

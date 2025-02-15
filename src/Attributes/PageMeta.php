@@ -3,31 +3,39 @@
 namespace Compass\Attributes;
 
 use Attribute;
-use Stringable;
 
 #[Attribute]
 readonly class PageMeta
 {
     public function __construct(
-        private string|Stringable $lang,
-        private string|Stringable $title,
-        private string|Stringable $description
+        private string $lang,
+        private string $title,
+        private string $description
     )
     {
     }
 
+    public static function __set_state(array $data): object
+    {
+        return new PageMeta(
+            lang: $data['lang'],
+            title: $data['title'],
+            description: $data['description']
+        );
+    }
+
     public function getLang(): string
     {
-        return (string)$this->lang;
+        return $this->lang;
     }
 
     public function getTitle(): string
     {
-        return (string)$this->title;
+        return $this->title;
     }
 
     public function getDescription(): string
     {
-        return (string)$this->description;
+        return $this->description;
     }
 }

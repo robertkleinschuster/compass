@@ -17,7 +17,6 @@ use Compass\Templates\Boundary;
 use Compass\Templates\Document;
 use Compass\Templates\Partial;
 use Error;
-use Mosaic\AttributeHelper;
 use Mosaic\Exception\RenderException;
 use Mosaic\Helper\Arguments;
 use Mosaic\Renderable;
@@ -29,22 +28,50 @@ readonly class Page implements Renderable
 {
     public const PARTIAL_PARAM = '_partial';
     private mixed $page;
-    private AttributeHelper $attributeHelper;
+    /** @var Header[] */
+    private array $headers;
+    private ?PageMeta $meta;
+    /** @var PageStyle[] */
+    private array $styles;
+    /** @var PageScript[] */
+    private array $scripts;
+    private ?Lazy $lazy;
+    private ?Resource $resource;
+    private ?Reactive $reactive;
 
     /**
      * @param Route $route
      * @param string $uri
      * @param array<string, string> $params
      * @param array<string, mixed> $queryParams
-     * @throws InvalidPageRouteException
+     * @throws InvalidPageRouteException|ReflectionException
      */
     public function __construct(private Route $route, private string $uri, private array $params, private array $queryParams)
     {
         if ($this->route->getPage() === null) {
             throw new InvalidPageRouteException(sprintf('Route with path `%s` has no page.', $this->route->getPath()));
         }
-        $this->attributeHelper = new AttributeHelper();
+        if ($this->route->getPageInfo() === null) {
+            throw new InvalidPageRouteException(sprintf('Route with path `%s` has no page info.', $this->route->getPath()));
+        }
         $this->page = require $this->route->getPage();
+        $this->headers = $this->route->getPageInfo()->getHeaders();
+        $this->meta = $this->route->getPageInfo()->getMeta();
+        $this->styles = $this->route->getPageInfo()->getStyles();
+        $scripts = $this->route->getPageInfo()->getScripts();
+        $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
+        $this->scripts = $scripts;
+        $this->lazy = $this->route->getPageInfo()->getLazy();
+        $this->resource = $this->route->getPageInfo()->getResource();
+        $this->reactive = $this->route->getPageInfo()->getReactive();
+    }
+
+    /**
+     * @return Header[]
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 
     /**
@@ -67,7 +94,7 @@ readonly class Page implements Renderable
             ]));
         }
 
-        if ($this->isReactive()) {
+        if ($this->reactive) {
             $children = new Boundary($children, $route->getPath());
         }
 
@@ -82,88 +109,6 @@ readonly class Page implements Renderable
         }
 
         return $children;
-    }
-
-    /**
-     * @return Header[]
-     * @throws ReflectionException
-     */
-    public function getHeaders(): array
-    {
-        return $this->attributeHelper->getAttributes($this->page, Header::class);
-    }
-
-    /**
-     * @return PageMeta|null
-     * @throws ReflectionException
-     */
-    public function getMeta(): ?PageMeta
-    {
-        $attributes = $this->attributeHelper->getAttributes($this->page, PageMeta::class);
-        foreach ($attributes as $attribute) {
-            return $attribute;
-        }
-        return null;
-    }
-
-    /**
-     * @return PageScript[]
-     * @throws ReflectionException
-     */
-    public function getScripts(): array
-    {
-        $scripts = $this->attributeHelper->getAttributes($this->page, PageScript::class);
-        $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
-        $route = $this->route;
-
-        do {
-            if ($route->getScript() !== null) {
-                array_unshift($scripts, new PageScript($route->getPath() . '.js'));
-            }
-        } while ($route = $route->getParent());
-
-        return $scripts;
-    }
-
-    /**
-     * @return PageStyle[]
-     * @throws ReflectionException
-     */
-    public function getStyles(): array
-    {
-        $styles = $this->attributeHelper->getAttributes($this->page, PageStyle::class);
-        $route = $this->route;
-
-        do {
-            if ($route->getStylesheet() !== null) {
-                array_unshift($styles, new PageStyle($route->getPath() . '.css'));
-            }
-        } while ($route = $route->getParent());
-
-        return $styles;
-    }
-
-    public function isResource(): bool
-    {
-        return !empty($this->attributeHelper->getAttributes($this->page, Resource::class));
-    }
-
-    public function isReactive(): bool
-    {
-        return !empty($this->attributeHelper->getAttributes($this->page, Reactive::class));
-    }
-
-    public function isLazy(): bool
-    {
-        return !empty($this->attributeHelper->getAttributes($this->page, Lazy::class));
-    }
-
-    public function getLoading(): mixed
-    {
-        foreach ($this->attributeHelper->getAttributes($this->page, Lazy::class) as $lazy) {
-            return $lazy->getLoading();
-        }
-        return null;
     }
 
     /**
@@ -185,46 +130,44 @@ readonly class Page implements Renderable
             $args['params'] = $this->params;
             $args['queryParams'] = $this->queryParams;
 
-            $page = require $this->route->getPage();
-
-            if ($this->isResource()) {
-                $view = $page;
+            if ($this->resource) {
+                $view = $this->page;
             } else {
-                $meta = $this->getMeta();
-
                 if ($partial) {
 
                     if ($partial === Boundary::CONTENT_ONLY_PARTIAL) {
-                        $view = $page;
+                        $view = $this->page;
                     } else {
                         if (!str_starts_with($this->route->getPath(), $partial)) {
                             throw new InvalidPartialException(sprintf('Invalid partial `%s` for route `%s`', $partial, $this->route->getPath()));
                         }
-                        $view = $this->renderLayout($renderer, $this->route, $page, (array)$args, $partial);
+                        $view = $this->renderLayout($renderer, $this->route, $this->page, (array)$args, $partial);
                     }
 
                     $view = new Partial(
                         children: $view,
-                        title: $meta?->getTitle() ?? '',
-                        scripts: $this->getScripts(),
-                        styles: $this->getStyles()
+                        title: $this->meta?->getTitle() ?? '',
+                        scripts: $this->scripts,
+                        styles: $this->styles
                     );
 
                 } else {
 
-                    if ($this->isLazy()) {
-                        $page = new Boundary($this->getLoading() ?? '', Boundary::CONTENT_ONLY_PARTIAL, true);
+                    if ($this->lazy) {
+                        $page = new Boundary($this->lazy->getLoading() ?? '', Boundary::CONTENT_ONLY_PARTIAL, true);
+                    } else {
+                        $page = $this->page;
                     }
 
                     $view = $this->renderLayout($renderer, $this->route, $page, (array)$args, $partial);
 
                     $view = new Document(
                         children: $view,
-                        lang: $meta?->getLang() ?? 'en',
-                        title: $meta?->getTitle() ?? '',
-                        description: $meta?->getDescription() ?? '',
-                        styles: $this->getStyles(),
-                        scripts: $this->getScripts()
+                        lang: $this->meta?->getLang() ?? 'en',
+                        title: $this->meta?->getTitle() ?? '',
+                        description: $this->meta?->getDescription() ?? '',
+                        styles: $this->styles,
+                        scripts: $this->scripts
                     );
                 }
             }

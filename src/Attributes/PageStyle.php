@@ -3,17 +3,23 @@
 namespace Compass\Attributes;
 
 use Attribute;
-use Stringable;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_ALL)]
 readonly class PageStyle
 {
-    public function __construct(private string|Stringable $href)
+    public function __construct(private string $href)
     {
+    }
+
+    public static function __set_state(array $data): object
+    {
+        return new PageStyle(
+            href: $data['href']
+        );
     }
 
     public function getHref(): string
     {
-        return (string)$this->href;
+        return $this->href;
     }
 }

@@ -56,7 +56,8 @@ class RouteCollector
             null,
             null,
             null,
-            __DIR__ . '/Templates/client-router.js'
+            __DIR__ . '/Templates/client-router.js',
+            null
         );
         return $routes;
     }

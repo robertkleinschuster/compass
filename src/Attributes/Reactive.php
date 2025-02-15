@@ -9,4 +9,8 @@ use Attribute;
 #[Attribute]
 class Reactive
 {
+    public static function __set_state(array $data): object
+    {
+        return new Reactive();
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
+use Compass\PageInfoFactory;
 use Mosaic\Renderer;
 use Compass\Route;
 use Compass\Page;
@@ -13,9 +14,10 @@ class PageTest extends TestCase
 {
     public function testRender()
     {
-        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null);
+        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer/sub/child/page.php', null, null);
+        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null, null);
+        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null, null);
+        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null, $pageInfo);
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
@@ -24,7 +26,9 @@ class PageTest extends TestCase
 
     public function testRenderNoLayout()
     {
-        $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', null, null, null, null);
+        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer-no-layout/page.php', null, null);
+
+        $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', null, null, null, null, $pageInfo);
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($root, '/sub/child', ['id' => '1'], []));
@@ -33,9 +37,11 @@ class PageTest extends TestCase
 
     public function testRenderPartial()
     {
-        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null);
+        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer/sub/child/page.php', null, null);
+
+        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null, null);
+        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null, null);
+        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null, $pageInfo);
 
         $renderer = new Renderer();
 
@@ -54,9 +60,11 @@ class PageTest extends TestCase
 
     public function testRenderLazy()
     {
-        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', __DIR__ . '/lazy/sub/layout.php', null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null);
+        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/lazy/sub/child/page.php', null, null);
+
+        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null, null);
+        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', __DIR__ . '/lazy/sub/layout.php', null, null, null, null);
+        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null, $pageInfo);
 
         $renderer = new Renderer();
 
@@ -66,9 +74,9 @@ class PageTest extends TestCase
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub']));
         $this->assertStringContainsString('<template data-title=""><sub><child id="1">page 1 /sub/child</child></sub></template>', (string)$result);
 
-        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', null, null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null);
+        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null, null);
+        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', null, null, null, null, null);
+        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null, $pageInfo);
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
         $this->assertStringContainsString('<root><child id="1"><route-boundary partial="." fetch-on-connected></route-boundary></child></root>', (string)$result);

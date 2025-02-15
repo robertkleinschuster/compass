@@ -11,6 +11,8 @@ use SplFileInfo;
 
 readonly class DirectoryScanner
 {
+    private PageInfoFactory $pageInfoFactory;
+
     public function __construct(
         private string $pageFilename,
         private string $layoutFilename,
@@ -19,6 +21,7 @@ readonly class DirectoryScanner
         private string $scriptFilename,
     )
     {
+        $this->pageInfoFactory = new PageInfoFactory();
     }
 
     /**
@@ -78,6 +81,7 @@ readonly class DirectoryScanner
             $actionFile = $actions[$path] ?? null;
             $stylesheetFile = $stylesheets[$path] ?? null;
             $scriptFile = $scripts[$path] ?? null;
+            $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile, $stylesheetFile, $scriptFile): null;
 
             if ($path === '') {
                 $path = '/';
@@ -88,7 +92,8 @@ readonly class DirectoryScanner
                     layout: $layoutFile,
                     action: $actionFile,
                     stylesheet: $stylesheetFile,
-                    script: $scriptFile
+                    script: $scriptFile,
+                    pageInfo: $pageInfo
                 );
             } else {
                 $path = implode('/', explode(DIRECTORY_SEPARATOR, $path));
@@ -106,7 +111,8 @@ readonly class DirectoryScanner
                     layout: $layoutFile,
                     action: $actionFile,
                     stylesheet: $stylesheetFile,
-                    script: $scriptFile
+                    script: $scriptFile,
+                    pageInfo: $pageInfo
                 );
             }
 

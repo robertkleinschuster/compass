@@ -14,6 +14,13 @@ class Lazy
     {
     }
 
+    public static function __set_state(array $data): object
+    {
+        return new Lazy(
+            loading: $data['loading']
+        );
+    }
+
     public function getLoading(): mixed
     {
         return $this->loading;
