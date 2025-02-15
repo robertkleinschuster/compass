@@ -11,8 +11,8 @@ class RouteCollector
     public const PAGE_FILENAME = 'page.php';
     public const LAYOUT_FILENAME = 'layout.php';
     public const ACTION_FILENAME = 'action.php';
-    private const SCRIPT_FILENAME = 'script.js';
-    private const STYLESHEET_FILENAME = 'styles.css';
+    public const SCRIPT_FILENAME = 'script.js';
+    public const STYLESHEET_FILENAME = 'styles.css';
 
     /**
      * @var Route[]
