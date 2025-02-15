@@ -94,6 +94,16 @@ final class Route implements Stringable
         return $this->script;
     }
 
+    public function getScriptPath(): string
+    {
+        return $this->getPath() . '.js';
+    }
+
+    public function getStylesheetPath(): string
+    {
+        return $this->getPath() . '.css';
+    }
+
     public function __toString(): string
     {
         return $this->getName();

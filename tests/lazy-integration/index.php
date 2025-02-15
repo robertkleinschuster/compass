@@ -14,13 +14,13 @@ $routeCollector = new RouteCollector(__DIR__ . '/app');
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 foreach ($routeCollector->getRoutes() as $route) {
-    if ($route->getPath() . '.js' === $path && $route->getScript() !== null) {
+    if ($route->getScriptPath() === $path && $route->getScript() !== null) {
         header('Content-Type: application/javascript');
         require $route->getScript();
         break;
     }
 
-    if ($route->getPath() . '.css' === $path && $route->getStylesheet() !== null) {
+    if ($route->getStylesheetPath() === $path && $route->getStylesheet() !== null) {
         header('Content-Type: text/css');
         require $route->getStylesheet();
         break;
