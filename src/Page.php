@@ -114,9 +114,14 @@ readonly class Page implements Renderable
     {
         $scripts = $this->attributeHelper->getAttributes($this->page, PageScript::class);
         $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
-        if ($this->route->getScript() !== null) {
-            $scripts[] = new PageScript($this->route->getPath() . '.js');
-        }
+        $route = $this->route;
+
+        do {
+            if ($route->getScript() !== null) {
+                array_unshift($scripts, new PageScript($route->getPath() . '.js'));
+            }
+        } while ($route = $route->getParent());
+
         return $scripts;
     }
 
@@ -127,9 +132,14 @@ readonly class Page implements Renderable
     public function getStyles(): array
     {
         $styles = $this->attributeHelper->getAttributes($this->page, PageStyle::class);
-        if ($this->route->getStylesheet() !== null) {
-            $styles[] = new PageStyle($this->route->getPath() . '.css');
-        }
+        $route = $this->route;
+
+        do {
+            if ($route->getStylesheet() !== null) {
+                array_unshift($styles, new PageStyle($route->getPath() . '.css'));
+            }
+        } while ($route = $route->getParent());
+
         return $styles;
     }
 

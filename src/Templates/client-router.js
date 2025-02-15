@@ -73,7 +73,7 @@ if (!customElements.get('route-boundary')) {
         }
 
         loadStyle(href) {
-            if (!document.querySelector(`link[href='\${href}']`)) {
+            if (!document.querySelector(`link[href='${href}']`)) {
                 const style = document.createElement('link');
                 style.rel = 'stylesheet';
                 style.href = href;
@@ -82,7 +82,7 @@ if (!customElements.get('route-boundary')) {
         }
 
         loadScript(src) {
-            if (!document.querySelector(`script[src='\${src}']`)) {
+            if (!document.querySelector(`script[src='${src}']`)) {
                 const script = document.createElement('script');
                 script.src = src;
                 document.head.appendChild(script)
@@ -101,17 +101,19 @@ if (!customElements.get('route-boundary')) {
                     if (wrapper.querySelector('script')) {
                         const data = JSON.parse(wrapper.querySelector('script').innerText)
                         document.head.querySelectorAll('script[src]').forEach(script => {
-                            if (!script.src.endsWith('.client-router.js')) {
+                            const url = new URL(script.src, document.baseURI);
+                            if (!script.src.endsWith('.client-router.js') && !data.scripts.includes(url.pathname)) {
                                 script.remove()
                             }
                         });
-                        if (Array.isArray(data.scripts)) {
-                            data.scripts.forEach(this.loadScript)
-                        }
-                        document.head.querySelectorAll('link[rel=stylesheet]').forEach(style => style.remove())
-                        if (Array.isArray(data.styles)) {
-                            data.styles.forEach(this.loadStyle)
-                        }
+                        data.scripts.forEach(this.loadScript)
+                        document.head.querySelectorAll('link[rel=stylesheet]').forEach(style => {
+                            const url = new URL(style.href, document.baseURI);
+                            if (!data.styles.includes(url.pathname)) {
+                                style.remove()
+                            }
+                        })
+                        data.styles.forEach(this.loadStyle)
                     }
                     document.title = template.dataset.title
                     this.replaceWith(template.content);

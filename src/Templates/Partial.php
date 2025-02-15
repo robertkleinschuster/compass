@@ -27,7 +27,10 @@ class Partial implements Renderable
 
     public function render(Renderer $renderer, mixed $data)
     {
-        $assets = [];
+        $assets = [
+            'scripts' => [],
+            'styles' => []
+        ];
         foreach ($this->scripts as $script) {
             $assets['scripts'][] = $script->getSrc();
         }
