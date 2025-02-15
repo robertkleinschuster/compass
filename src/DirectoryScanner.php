@@ -81,8 +81,8 @@ readonly class DirectoryScanner
             $actionFile = $actions[$path] ?? null;
             $stylesheetFile = $stylesheets[$path] ?? null;
             $scriptFile = $scripts[$path] ?? null;
-            $stylesheetPath = $stylesheetFile !== null ? ($path ?: 'styles') . '.css' : null;
-            $scriptPath = $scriptFile !== null ? ($path ?: 'script') . '.js' : null;
+            $stylesheetPath = $stylesheetFile !== null ? ($path ?: '/styles') . '.css' : null;
+            $scriptPath = $scriptFile !== null ? ($path ?: '/script') . '.js' : null;
             $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(
                 require $pageFile,
                 $stylesheetPath,
