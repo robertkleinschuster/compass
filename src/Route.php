@@ -17,7 +17,9 @@ final class Route implements Stringable
         private readonly ?string $layout,
         private readonly ?string $action,
         private readonly ?string $stylesheet,
+        private readonly ?string $stylesheetPath,
         private readonly ?string $script,
+        private readonly ?string $scriptPath,
         private readonly ?PageInfo $pageInfo
     )
     {
@@ -39,7 +41,9 @@ final class Route implements Stringable
             layout: $data['layout'],
             action: $data['action'],
             stylesheet: $data['stylesheet'],
+            stylesheetPath: $data['stylesheetPath'],
             script: $data['script'],
+            scriptPath: $data['scriptPath'],
             pageInfo: $data['pageInfo'],
         );
     }
@@ -99,14 +103,14 @@ final class Route implements Stringable
         return $this->script;
     }
 
-    public function getScriptPath(): string
+    public function getStylesheetPath(): ?string
     {
-        return $this->getPath() . '.js';
+        return $this->stylesheetPath;
     }
 
-    public function getStylesheetPath(): string
+    public function getScriptPath(): ?string
     {
-        return $this->getPath() . '.css';
+        return $this->scriptPath;
     }
 
     public function getPageInfo(): ?PageInfo

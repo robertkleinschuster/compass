@@ -81,11 +81,13 @@ readonly class DirectoryScanner
             $actionFile = $actions[$path] ?? null;
             $stylesheetFile = $stylesheets[$path] ?? null;
             $scriptFile = $scripts[$path] ?? null;
+            $stylesheetPath = $stylesheetFile !== null ? ($path ?: 'styles') . '.css' : null;
+            $scriptPath = $scriptFile !== null ? ($path ?: 'script') . '.js' : null;
             $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(
                 require $pageFile,
-                $stylesheetFile ? $path . '.css' : null,
-                $scriptFile ? $path . '.js' : null
-            ): null;
+                $stylesheetPath,
+                $scriptPath
+            ) : null;
 
             if ($path === '') {
                 $path = '/';
@@ -96,7 +98,9 @@ readonly class DirectoryScanner
                     layout: $layoutFile,
                     action: $actionFile,
                     stylesheet: $stylesheetFile,
+                    stylesheetPath: $stylesheetPath,
                     script: $scriptFile,
+                    scriptPath: $scriptPath,
                     pageInfo: $pageInfo
                 );
             } else {
@@ -115,7 +119,9 @@ readonly class DirectoryScanner
                     layout: $layoutFile,
                     action: $actionFile,
                     stylesheet: $stylesheetFile,
+                    stylesheetPath: $stylesheetPath,
                     script: $scriptFile,
+                    scriptPath: $scriptPath,
                     pageInfo: $pageInfo
                 );
             }

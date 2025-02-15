@@ -22,7 +22,7 @@ class RoutesCacheTest extends TestCase
     {
         $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 
-        $route = new Route( '/', null, '', null, null, null, null, $pageInfo);
+        $route = new Route( '/', null, '', null, null, null, null, null, null, $pageInfo);
         $cache = new RoutesCache(__DIR__ . '/routes-cache.php');
         $cache->save([$route]);
         $routes = $cache->load();

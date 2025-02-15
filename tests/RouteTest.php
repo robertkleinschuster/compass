@@ -14,8 +14,8 @@ class RouteTest extends TestCase
     {
         $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 
-        $startpage = new Route('/', null, '', 'test', null, null, null, null);
-        $about = new Route('/about', $startpage, '', null, null, null, null, $pageInfo);
+        $startpage = new Route('/', null, '', 'test', null, null, null, null, null, null);
+        $about = new Route('/about', $startpage, '', null, null, null, null, null, null, $pageInfo);
 
         /** @var $startpageRestored Route */
         eval('$startpageRestored = ' . var_export($startpage, true) . ';');
