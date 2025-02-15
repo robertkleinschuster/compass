@@ -56,7 +56,9 @@ class RouteCollector
             null,
             null,
             null,
+            null,
             __DIR__ . '/Templates/client-router.js',
+            Boundary::SCRIPT_PATH,
             null
         );
         return $routes;
