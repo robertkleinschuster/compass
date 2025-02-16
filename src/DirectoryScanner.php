@@ -81,8 +81,24 @@ readonly class DirectoryScanner
             $actionFile = $actions[$path] ?? null;
             $stylesheetFile = $stylesheets[$path] ?? null;
             $scriptFile = $scripts[$path] ?? null;
-            $stylesheetPath = $stylesheetFile !== null ? $path . '/styles.css' : null;
-            $scriptPath = $scriptFile !== null ? $path . '/script.js' : null;
+            $stylesheetPath = null;
+            if ($stylesheetFile !== null) {
+                $hash = hash_file('crc32c', $stylesheetFile);
+                if ($hash === '00000000') {
+                    $stylesheetFile = null;
+                } else {
+                    $stylesheetPath = "$path/$hash.css";
+                }
+            }
+            $scriptPath = null;
+            if ($scriptFile !== null) {
+                $hash = hash_file('crc32c', $scriptFile);
+                if ($hash === '00000000') {
+                    $scriptFile = null;
+                } else {
+                    $scriptPath = "$path/$hash.js";
+                }
+            }
             $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(
                 require $pageFile,
                 $stylesheetPath,

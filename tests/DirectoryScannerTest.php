@@ -141,13 +141,16 @@ class DirectoryScannerTest extends TestCase
 
         $root = $routes[0];
         $about = $routes[1];
+        $users = $routes[2];
 
-        self::assertSame('/script.js', $root->getScriptPath());
-        self::assertSame('/styles.css', $root->getStylesheetPath());
+        self::assertSame('/e935a539.js', $root->getScriptPath());
+        self::assertSame('/d2ecffa0.css', $root->getStylesheetPath());
         self::assertSame(__DIR__ . '/pages/about/script.js', $about->getScript());
-        self::assertSame('/about/script.js', $about->getScriptPath());
+        self::assertSame('/about/e935a539.js', $about->getScriptPath());
         self::assertSame(__DIR__ . '/pages/about/styles.css', $about->getStylesheet());
-        self::assertSame('/about/styles.css', $about->getStylesheetPath());
+        self::assertSame('/about/d2ecffa0.css', $about->getStylesheetPath());
+        self::assertNull($users->getScript());
+        self::assertNull($users->getScriptPath());
     }
 
     public function testShouldSetTheParentToEachPageWhenStartpageIsMissing()
