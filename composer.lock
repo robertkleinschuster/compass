@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/robertkleinschuster/mosaic.git",
-                "reference": "49b0e5f924a9d5e8cbdcfc69fb12bb0dd23596c5"
+                "reference": "8f02a737b7018b0aa5587fa22dfd94832d8f5b9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robertkleinschuster/mosaic/zipball/49b0e5f924a9d5e8cbdcfc69fb12bb0dd23596c5",
-                "reference": "49b0e5f924a9d5e8cbdcfc69fb12bb0dd23596c5",
+                "url": "https://api.github.com/repos/robertkleinschuster/mosaic/zipball/8f02a737b7018b0aa5587fa22dfd94832d8f5b9d",
+                "reference": "8f02a737b7018b0aa5587fa22dfd94832d8f5b9d",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "issues": "https://github.com/robertkleinschuster/mosaic/issues",
                 "source": "https://github.com/robertkleinschuster/mosaic/tree/v0.0.1"
             },
-            "time": "2025-02-13T07:23:18+00:00"
+            "time": "2025-02-16T12:31:44+00:00"
         }
     ],
     "packages-dev": [
