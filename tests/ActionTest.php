@@ -12,7 +12,7 @@ class ActionTest extends TestCase
 {
     public function testShouldInvokeActionWithParams()
     {
-        $route = new Route('', null, null, null, __DIR__ . '/actions/action.php', null, null, null, null, null);
+        $route = new Route(path: '', actionFile: __DIR__ . '/actions/action.php');
         $handler = new Action($route, ['id' => '1'], [], []);
         $result = $handler->call();
         $this->assertEquals('test 1', $result);

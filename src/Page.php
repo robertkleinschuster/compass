@@ -48,22 +48,35 @@ readonly class Page implements Renderable
      */
     public function __construct(private Route $route, private string $uri, private array $params, private array $queryParams)
     {
-        if ($this->route->getPage() === null) {
+        if ($this->route->getPageFile() === null) {
             throw new InvalidPageRouteException(sprintf('Route with path `%s` has no page.', $this->route->getPath()));
         }
-        if ($this->route->getPageInfo() === null) {
+        if ($this->route->getPageAttributes() === null) {
             throw new InvalidPageRouteException(sprintf('Route with path `%s` has no page info.', $this->route->getPath()));
         }
-        $this->page = require $this->route->getPage();
-        $this->headers = $this->route->getPageInfo()->getHeaders();
-        $this->meta = $this->route->getPageInfo()->getMeta();
-        $this->styles = $this->route->getPageInfo()->getStyles();
-        $scripts = $this->route->getPageInfo()->getScripts();
+        $this->page = require $this->route->getPageFile();
+        $this->headers = $this->route->getPageAttributes()->getHeaders();
+        $this->meta = $this->route->getPageAttributes()->getMeta();
+        $styles = $this->route->getPageAttributes()->getStyles();
+        foreach ($this->route->getLayoutStylesheets() as $stylesheet) {
+            array_unshift($styles, new PageStyle($stylesheet));
+        }
+        if ($this->route->getPageStylesheetPath() !== null) {
+            $styles[] = new PageStyle($this->route->getPageStylesheetPath());
+        }
+        $this->styles = $styles;
+        $scripts = $this->route->getPageAttributes()->getScripts();
         $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
+        foreach ($this->route->getLayoutScripts() as $script) {
+            array_unshift($scripts, new PageScript($script));
+        }
+        if ($this->route->getPageScriptPath() !== null) {
+            $scripts[] = new PageScript($this->route->getPageScriptPath());
+        }
         $this->scripts = $scripts;
-        $this->lazy = $this->route->getPageInfo()->getLazy();
-        $this->resource = $this->route->getPageInfo()->getResource();
-        $this->reactive = $this->route->getPageInfo()->getReactive();
+        $this->lazy = $this->route->getPageAttributes()->getLazy();
+        $this->resource = $this->route->getPageAttributes()->getResource();
+        $this->reactive = $this->route->getPageAttributes()->getReactive();
     }
 
     /**
@@ -86,8 +99,8 @@ readonly class Page implements Renderable
      */
     public function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
     {
-        if ($route->hasLayout()) {
-            $layout = require $route->getLayout();
+        if ($route->getLayoutFile() !== null) {
+            $layout = require $route->getLayoutFile();
             $children = $renderer->render($layout, $renderer->args([
                 ...$args,
                 'children' => $renderer->render($children, $renderer->args($args))

@@ -12,7 +12,7 @@ use Compass\Attributes\Resource;
 use Mosaic\AttributeHelper;
 use ReflectionException;
 
-class PageInfoFactory
+class PageAttributesFactory
 {
     private AttributeHelper $attributeHelper;
 
@@ -26,17 +26,17 @@ class PageInfoFactory
      * @param mixed $page
      * @param string|null $style
      * @param string|null $script
-     * @return PageInfo
+     * @return PageAttributes
      * @throws ReflectionException
      */
-    public function create(mixed $page, ?string $style, ?string $script): PageInfo
+    public function create(mixed $page): PageAttributes
     {
         $attributes = $this->attributeHelper->getAttributes($page);
-        return new PageInfo(
+        return new PageAttributes(
             headers: $this->getHeaders($attributes),
             meta: $this->getMeta($attributes),
-            styles: $this->getStyles($attributes, $style),
-            scripts: $this->getScripts($attributes, $script),
+            styles: $this->getStyles($attributes),
+            scripts: $this->getScripts($attributes),
             lazy: $this->getLazy($attributes),
             resource: $this->getResource($attributes),
             reactive: $this->getReactive($attributes)
@@ -73,7 +73,7 @@ class PageInfoFactory
     /**
      * @return PageScript[]
      */
-    private function getScripts(array $attributes, ?string $routeScript): array
+    private function getScripts(array $attributes): array
     {
         $scripts = [];
 
@@ -83,17 +83,13 @@ class PageInfoFactory
             }
         }
 
-        if ($routeScript !== null) {
-            $scripts[] = new PageScript($routeScript);
-        }
-
         return $scripts;
     }
 
     /**
      * @return PageStyle[]
      */
-    private function getStyles(array $attributes, ?string $routeStyle): array
+    private function getStyles(array $attributes): array
     {
         $styles = [];
 
@@ -101,10 +97,6 @@ class PageInfoFactory
             if ($attribute instanceof PageStyle) {
                 $styles[] = $attribute;
             }
-        }
-
-        if ($routeStyle !== null) {
-            $styles[] = new PageStyle($routeStyle);
         }
 
         return $styles;

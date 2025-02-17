@@ -9,20 +9,25 @@ use PHPUnit\Framework\TestCase;
 
 class DirectoryScannerTest extends TestCase
 {
-    private const PAGE_FILENAME = 'page.php';
-    private const LAYOUT_FILENAME = 'layout.php';
-    private const ACTION_FILENAME = 'action.php';
-    private const SCRIPT_FILENAME = 'script.js';
-    private const STYLESHEET_FILENAME = 'styles.css';
+    public const PAGE_FILENAME = 'page.php';
+    public const PAGE_SCRIPT_FILENAME = 'page.js';
+    public const PAGE_STYLESHEET_FILENAME = 'page.css';
+    public const LAYOUT_FILENAME = 'layout.php';
+    public const LAYOUT_STYLESHEET_FILENAME = 'layout.css';
+    public const LAYOUT_SCRIPT_FILENAME = 'layout.js';
+    public const ACTION_FILENAME = 'action.php';
+
 
     public function testShouldFindRoutesWithAPage()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages');
         $this->assertCount(4, $routes);
@@ -36,7 +41,7 @@ class DirectoryScannerTest extends TestCase
         $this->assertEquals('/about', $about->getPath());
         $this->assertEquals('/users', $users->getPath());
         $this->assertEquals('/users/[id]', $userId->getPath());
-        $this->assertEquals(__DIR__ . '/pages/users/[id]/page.php', $userId->getPage());
+        $this->assertEquals(__DIR__ . '/pages/users/[id]/page.php', $userId->getPageFile());
     }
 
     public function testShouldSetLayoutFlagToEachPage()
@@ -44,10 +49,12 @@ class DirectoryScannerTest extends TestCase
 
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages');
         $this->assertCount(4, $routes);
@@ -57,20 +64,22 @@ class DirectoryScannerTest extends TestCase
         $users = $routes[2];
         $userId = $routes[3];
 
-        $this->assertTrue($startpage->hasLayout());
-        $this->assertTrue($about->hasLayout());
-        $this->assertTrue($users->hasLayout());
-        $this->assertFalse($userId->hasLayout());
+        $this->assertNotNull($startpage->getLayoutFile());
+        $this->assertNotNull($about->getLayoutFile());
+        $this->assertNotNull($users->getLayoutFile());
+        $this->assertNull($userId->getLayoutFile());
     }
 
     public function testShouldFindActionForRoutes()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/actions');
         $this->assertCount(2, $routes);
@@ -78,18 +87,20 @@ class DirectoryScannerTest extends TestCase
         $startpage = $routes[0];
         $child = $routes[1];
 
-        $this->assertEquals(__DIR__ . '/actions/action.php', $startpage->getAction());
-        $this->assertNull($child->getAction());
+        $this->assertEquals(__DIR__ . '/actions/action.php', $startpage->getActionFile());
+        $this->assertNull($child->getActionFile());
     }
 
     public function testShouldIgnoreTrailingSlashesInDirectory()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages/');
         $this->assertCount(4, $routes);
@@ -109,10 +120,12 @@ class DirectoryScannerTest extends TestCase
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages');
 
@@ -132,10 +145,12 @@ class DirectoryScannerTest extends TestCase
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages');
 
@@ -143,24 +158,26 @@ class DirectoryScannerTest extends TestCase
         $about = $routes[1];
         $users = $routes[2];
 
-        self::assertSame('/e935a539.js', $root->getScriptPath());
-        self::assertSame('/d2ecffa0.css', $root->getStylesheetPath());
-        self::assertSame(__DIR__ . '/pages/about/script.js', $about->getScript());
-        self::assertSame('/about/e935a539.js', $about->getScriptPath());
-        self::assertSame(__DIR__ . '/pages/about/styles.css', $about->getStylesheet());
-        self::assertSame('/about/d2ecffa0.css', $about->getStylesheetPath());
-        self::assertNull($users->getScript());
-        self::assertNull($users->getScriptPath());
+        self::assertSame('/e935a539.js', $root->getPageScriptPath());
+        self::assertSame('/d2ecffa0.css', $root->getPageStylesheetPath());
+        self::assertSame(__DIR__ . '/pages/about/page.js', $about->getPageScriptFile());
+        self::assertSame('/about/e935a539.js', $about->getPageScriptPath());
+        self::assertSame(__DIR__ . '/pages/about/page.css', $about->getPageStylesheetFile());
+        self::assertSame('/about/d2ecffa0.css', $about->getPageStylesheetPath());
+        self::assertNull($users->getPageScriptFile());
+        self::assertNull($users->getPageScriptPath());
     }
 
     public function testShouldSetTheParentToEachPageWhenStartpageIsMissing()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages-no-startpage');
 
@@ -175,10 +192,12 @@ class DirectoryScannerTest extends TestCase
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages-no-parent');
 
@@ -191,10 +210,12 @@ class DirectoryScannerTest extends TestCase
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
             layoutFilename: self::LAYOUT_FILENAME,
-            actionFilename: self::ACTION_FILENAME,
-            stylesheetFilename: self::STYLESHEET_FILENAME,
-            scriptFilename: self::SCRIPT_FILENAME
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
         );
         $routes = $scanner->scan(__DIR__ . '/pages-no-intermediate');
 

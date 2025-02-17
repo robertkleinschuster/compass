@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\PageInfoFactory;
+use Compass\PageAttributesFactory;
 use Mosaic\Renderer;
 use Compass\Route;
 use Compass\Page;
@@ -14,10 +14,10 @@ class PageTest extends TestCase
 {
     public function testRender()
     {
-        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer/sub/child/page.php', null, null);
-        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null, null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null, null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null, null, null, $pageInfo);
+        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
+        $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
+        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
+        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/renderer/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/renderer/sub/child/layout.php');
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
@@ -26,9 +26,9 @@ class PageTest extends TestCase
 
     public function testRenderNoLayout()
     {
-        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer-no-layout/page.php', null, null);
+        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer-no-layout/page.php');
 
-        $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', null, null, null, null, null, null, $pageInfo);
+        $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', pageAttributes: $pageInfo);
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($root, '/sub/child', ['id' => '1'], []));
@@ -37,11 +37,11 @@ class PageTest extends TestCase
 
     public function testRenderPartial()
     {
-        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/renderer/sub/child/page.php', null, null);
+        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
 
-        $root = new Route('/', null, __DIR__ . '/renderer/page.php', __DIR__ . '/renderer/layout.php', null, null, null, null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/renderer/sub/page.php', __DIR__ . '/renderer/sub/layout.php', null, null, null, null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/renderer/sub/child/page.php', __DIR__ . '/renderer/sub/child/layout.php', null, null, null, null, null, $pageInfo);
+        $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
+        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
+        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/renderer/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/renderer/sub/child/layout.php');
 
         $renderer = new Renderer();
 
@@ -60,11 +60,11 @@ class PageTest extends TestCase
 
     public function testRenderLazy()
     {
-        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/lazy/sub/child/page.php', null, null);
+        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/lazy/sub/child/page.php');
 
-        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null, null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', __DIR__ . '/lazy/sub/layout.php', null, null, null, null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null, null, null, $pageInfo);
+        $root = new Route(path: '/', pageFile: __DIR__ . '/lazy/page.php', layoutFile: __DIR__ . '/lazy/layout.php');
+        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/lazy/sub/page.php', layoutFile: __DIR__ . '/lazy/sub/layout.php');
+        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/lazy/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/lazy/sub/child/layout.php');
 
         $renderer = new Renderer();
 
@@ -74,9 +74,9 @@ class PageTest extends TestCase
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub']));
         $this->assertStringContainsString('<template data-title=""><sub><child id="1">page 1 /sub/child</child></sub></template>', (string)$result);
 
-        $root = new Route('/', null, __DIR__ . '/lazy/page.php', __DIR__ . '/lazy/layout.php', null, null, null, null, null, null);
-        $sub = new Route('/sub', $root, __DIR__ . '/lazy/sub/page.php', null, null, null, null, null, null, null);
-        $child = new Route('/sub/child', $sub, __DIR__ . '/lazy/sub/child/page.php', __DIR__ . '/lazy/sub/child/layout.php', null, null, null, null, null, $pageInfo);
+        $root = new Route(path: '/', pageFile: __DIR__ . '/lazy/page.php', layoutFile: __DIR__ . '/lazy/layout.php');
+        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/lazy/sub/page.php');
+        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/lazy/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/lazy/sub/child/layout.php');
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
         $this->assertStringContainsString('<root><child id="1"><route-boundary partial="." fetch-on-connected></route-boundary></child></root>', (string)$result);

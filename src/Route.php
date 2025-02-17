@@ -11,20 +11,24 @@ final class Route implements Stringable
     private ?string $cache = null;
 
     public function __construct(
-        private readonly string  $path,
-        private readonly ?Route  $parent,
-        private readonly ?string $page,
-        private readonly ?string $layout,
-        private readonly ?string $action,
-        private readonly ?string $stylesheet,
-        private readonly ?string $stylesheetPath,
-        private readonly ?string $script,
-        private readonly ?string $scriptPath,
-        private readonly ?PageInfo $pageInfo
+        private readonly string          $path,
+        private readonly ?Route          $parent = null,
+        private readonly ?string         $pageFile = null,
+        private readonly ?PageAttributes $pageAttributes = null,
+        private readonly ?string         $pageStylesheetFile = null,
+        private readonly ?string         $pageStylesheetPath = null,
+        private readonly ?string         $pageScriptFile = null,
+        private readonly ?string         $pageScriptPath = null,
+        private readonly ?string         $layoutFile = null,
+        private readonly ?string         $layoutStylesheetFile = null,
+        private readonly ?string         $layoutStylesheetPath = null,
+        private readonly ?string         $layoutScriptFile = null,
+        private readonly ?string         $layoutScriptPath = null,
+        private readonly ?string         $actionFile = null,
     )
     {
-        if ($this->pageInfo !== null && $this->parent?->getPageInfo() !== null) {
-            $this->pageInfo->setParent($this->parent->getPageInfo());
+        if ($this->pageAttributes !== null && $this->parent?->getPageAttributes() !== null) {
+            $this->pageAttributes->setParent($this->parent->getPageAttributes());
         }
     }
 
@@ -37,14 +41,18 @@ final class Route implements Stringable
         return new Route(
             path: $data['path'],
             parent: $data['parent'],
-            page: $data['page'],
-            layout: $data['layout'],
-            action: $data['action'],
-            stylesheet: $data['stylesheet'],
-            stylesheetPath: $data['stylesheetPath'],
-            script: $data['script'],
-            scriptPath: $data['scriptPath'],
-            pageInfo: $data['pageInfo'],
+            pageFile: $data['pageFile'],
+            pageAttributes: $data['pageAttributes'],
+            pageStylesheetFile: $data['pageStylesheetFile'],
+            pageStylesheetPath: $data['pageStylesheetPath'],
+            pageScriptFile: $data['pageScriptFile'],
+            pageScriptPath: $data['pageScriptPath'],
+            layoutFile: $data['layoutFile'],
+            layoutStylesheetFile: $data['layoutStylesheetFile'],
+            layoutStylesheetPath: $data['layoutStylesheetPath'],
+            layoutScriptFile: $data['layoutScriptFile'],
+            layoutScriptPath: $data['layoutScriptPath'],
+            actionFile: $data['actionFile'],
         );
     }
 
@@ -68,54 +76,99 @@ final class Route implements Stringable
         return $this->path;
     }
 
-    public function getPage(): ?string
-    {
-        return $this->page;
-    }
-
     public function getParent(): ?Route
     {
         return $this->parent;
     }
 
-    public function getLayout(): ?string
+    public function getPageFile(): ?string
     {
-        return $this->layout;
+        return $this->pageFile;
     }
 
-    public function hasLayout(): bool
+    public function getPageAttributes(): ?PageAttributes
     {
-        return isset($this->layout);
+        return $this->pageAttributes;
     }
 
-    public function getAction(): ?string
+    public function getPageStylesheetFile(): ?string
     {
-        return $this->action;
+        return $this->pageStylesheetFile;
     }
 
-    public function getStylesheet(): ?string
+    public function getPageStylesheetPath(): ?string
     {
-        return $this->stylesheet;
+        return $this->pageStylesheetPath;
     }
 
-    public function getScript(): ?string
+    public function getPageScriptFile(): ?string
     {
-        return $this->script;
+        return $this->pageScriptFile;
     }
 
-    public function getStylesheetPath(): ?string
+    public function getPageScriptPath(): ?string
     {
-        return $this->stylesheetPath;
+        return $this->pageScriptPath;
     }
 
-    public function getScriptPath(): ?string
+    public function getLayoutFile(): ?string
     {
-        return $this->scriptPath;
+        return $this->layoutFile;
     }
 
-    public function getPageInfo(): ?PageInfo
+    public function getLayoutStylesheetFile(): ?string
     {
-        return $this->pageInfo;
+        return $this->layoutStylesheetFile;
+    }
+
+    public function getLayoutStylesheetPath(): ?string
+    {
+        return $this->layoutStylesheetPath;
+    }
+
+    public function getLayoutScriptFile(): ?string
+    {
+        return $this->layoutScriptFile;
+    }
+
+    public function getLayoutScriptPath(): ?string
+    {
+        return $this->layoutScriptPath;
+    }
+
+    public function getActionFile(): ?string
+    {
+        return $this->actionFile;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLayoutScripts(): array
+    {
+        $scripts = [];
+        if ($this->getParent() !== null) {
+            $scripts = $this->getParent()->getLayoutScripts();
+        }
+        if ($this->getLayoutScriptPath() !== null) {
+            $scripts[] = $this->getLayoutScriptPath();
+        }
+        return $scripts;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLayoutStylesheets(): array
+    {
+        $stylesheets = [];
+        if ($this->getParent() !== null) {
+            $stylesheets = $this->getParent()->getLayoutStylesheets();
+        }
+        if ($this->getLayoutStylesheetPath() !== null) {
+            $stylesheets[] = $this->getLayoutStylesheetPath();
+        }
+        return $stylesheets;
     }
 
     public function __toString(): string

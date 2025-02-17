@@ -10,9 +10,9 @@ use Compass\Attributes\PageStyle;
 use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
 
-class PageInfo
+class PageAttributes
 {
-    private ?PageInfo $parent = null;
+    private ?PageAttributes $parent = null;
 
     /**
      * @param Header[] $headers
@@ -37,7 +37,7 @@ class PageInfo
 
     public static function __set_state(array $data): object
     {
-        return new PageInfo(
+        return new PageAttributes(
           headers: $data['headers'],
           meta: $data['meta'],
           styles: $data['styles'],
@@ -97,7 +97,7 @@ class PageInfo
         return $this->reactive;
     }
 
-    public function setParent(PageInfo $parent): void
+    public function setParent(PageAttributes $parent): void
     {
         $this->parent = $parent;
     }

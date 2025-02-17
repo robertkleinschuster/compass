@@ -29,7 +29,7 @@ readonly class Action
     public function call(mixed ...$args): mixed
     {
         try {
-            $action = require $this->route->getAction();
+            $action = require $this->route->getActionFile();
             $reflection = new ReflectionFunction($action);
             $actionArgs = [];
             foreach ($reflection->getParameters() as $parameter) {
@@ -51,7 +51,7 @@ readonly class Action
             }
             return call_user_func_array($action, $actionArgs);
         } catch (Error|ReflectionException $error) {
-            throw new InvalidActionException(sprintf('%s in action %s', $error->getMessage(), $this->route->getAction()), 0, $error);
+            throw new InvalidActionException(sprintf('%s in action %s', $error->getMessage(), $this->route->getActionFile()), 0, $error);
         }
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\PageInfoFactory;
+use Compass\PageAttributesFactory;
 use Compass\Route;
 use PHPUnit\Framework\TestCase;
 
@@ -12,10 +12,10 @@ class RouteTest extends TestCase
 {
     public function testShouldRestorableFromVarExport()
     {
-        $pageInfo = (new PageInfoFactory())->create(require __DIR__ . '/pages/page.php', null, null);
+        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 
-        $startpage = new Route('/', null, '', 'test', null, null, null, null, null, null);
-        $about = new Route('/about', $startpage, '', null, null, null, null, null, null, $pageInfo);
+        $startpage = new Route('/', layoutFile: 'layout');
+        $about = new Route('/about', $startpage, pageFile: 'page', pageAttributes:  $pageInfo);
 
         /** @var $startpageRestored Route */
         eval('$startpageRestored = ' . var_export($startpage, true) . ';');
@@ -23,10 +23,10 @@ class RouteTest extends TestCase
         eval('$aboutRestored = ' . var_export($about, true) . ';');
 
         $this->assertEquals('/', $startpageRestored->getPath());
-        $this->assertTrue($startpageRestored->hasLayout());
+        $this->assertNotNull($startpageRestored->getLayoutFile());
         $this->assertEquals('/about', $aboutRestored->getPath());
-        $this->assertFalse($aboutRestored->hasLayout());
+        $this->assertNull($aboutRestored->getLayoutFile());
         $this->assertEquals($startpageRestored, $aboutRestored->getParent());
-        $this->assertEquals($about->getPageInfo(), $aboutRestored->getPageInfo());
+        $this->assertEquals($about->getPageAttributes(), $aboutRestored->getPageAttributes());
     }
 }

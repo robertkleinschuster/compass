@@ -11,17 +11,19 @@ use SplFileInfo;
 
 readonly class DirectoryScanner
 {
-    private PageInfoFactory $pageInfoFactory;
+    private PageAttributesFactory $pageInfoFactory;
 
     public function __construct(
         private string $pageFilename,
+        private string $pageStylesheetFilename,
+        private string $pageScriptFilename,
         private string $layoutFilename,
+        private string $layoutStylesheetFilename,
+        private string $layoutScriptFilename,
         private string $actionFilename,
-        private string $stylesheetFilename,
-        private string $scriptFilename,
     )
     {
-        $this->pageInfoFactory = new PageInfoFactory();
+        $this->pageInfoFactory = new PageAttributesFactory();
     }
 
     /**
@@ -41,6 +43,8 @@ readonly class DirectoryScanner
 
         $pages = [];
         $layouts = [];
+        $layoutStylesheets = [];
+        $layoutScripts = [];
         $actions = [];
         $stylesheets = [];
         $scripts = [];
@@ -56,13 +60,19 @@ readonly class DirectoryScanner
             if ($item->getFilename() === $this->layoutFilename) {
                 $layouts[$path] = $item->getPathname();
             }
+            if ($item->getFilename() === $this->layoutStylesheetFilename) {
+                $layoutStylesheets[$path] = $item->getPathname();
+            }
+            if ($item->getFilename() === $this->layoutScriptFilename) {
+                $layoutScripts[$path] = $item->getPathname();
+            }
             if ($item->getFilename() === $this->actionFilename) {
                 $actions[$path] = $item->getPathname();
             }
-            if ($item->getFilename() === $this->stylesheetFilename) {
+            if ($item->getFilename() === $this->pageStylesheetFilename) {
                 $stylesheets[$path] = $item->getPathname();
             }
-            if ($item->getFilename() === $this->scriptFilename) {
+            if ($item->getFilename() === $this->pageScriptFilename) {
                 $scripts[$path] = $item->getPathname();
             }
         }
@@ -78,46 +88,66 @@ readonly class DirectoryScanner
         foreach ($directories as $i => $path) {
             $pageFile = $pages[$path] ?? null;
             $layoutFile = $layouts[$path] ?? null;
+            $layoutStylesheetFile = $layoutStylesheets[$path] ?? null;
+            $layoutScriptFile = $layoutScripts[$path] ?? null;
             $actionFile = $actions[$path] ?? null;
-            $stylesheetFile = $stylesheets[$path] ?? null;
-            $scriptFile = $scripts[$path] ?? null;
-            $stylesheetPath = null;
-            if ($stylesheetFile !== null) {
-                $hash = hash_file('crc32c', $stylesheetFile);
+            $pageStylesheetFile = $stylesheets[$path] ?? null;
+            $pageScriptFile = $scripts[$path] ?? null;
+            $pageStylesheetPath = null;
+            if ($pageStylesheetFile !== null) {
+                $hash = hash_file('crc32c', $pageStylesheetFile);
                 if ($hash === '00000000') {
-                    $stylesheetFile = null;
+                    $pageStylesheetFile = null;
                 } else {
-                    $stylesheetPath = "$path/$hash.css";
+                    $pageStylesheetPath = "$path/$hash.css";
                 }
             }
-            $scriptPath = null;
-            if ($scriptFile !== null) {
-                $hash = hash_file('crc32c', $scriptFile);
+            $pageScriptPath = null;
+            if ($pageScriptFile !== null) {
+                $hash = hash_file('crc32c', $pageScriptFile);
                 if ($hash === '00000000') {
-                    $scriptFile = null;
+                    $pageScriptFile = null;
                 } else {
-                    $scriptPath = "$path/$hash.js";
+                    $pageScriptPath = "$path/$hash.js";
                 }
             }
-            $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(
-                require $pageFile,
-                $stylesheetPath,
-                $scriptPath
-            ) : null;
+
+            $layoutStylesheetPath = null;
+            if ($layoutStylesheetFile !== null) {
+                $hash = hash_file('crc32c', $layoutStylesheetFile);
+                if ($hash === '00000000') {
+                    $layoutStylesheetFile = null;
+                } else {
+                    $layoutStylesheetPath = "$path/$hash.css";
+                }
+            }
+            $layoutScriptPath = null;
+            if ($layoutScriptFile !== null) {
+                $hash = hash_file('crc32c', $layoutScriptFile);
+                if ($hash === '00000000') {
+                    $layoutScriptFile = null;
+                } else {
+                    $layoutScriptPath = "$path/$hash.js";
+                }
+            }
+            $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
 
             if ($path === '') {
                 $path = '/';
                 $results[] = new Route(
                     path: $path,
-                    parent: null,
-                    page: $pageFile,
-                    layout: $layoutFile,
-                    action: $actionFile,
-                    stylesheet: $stylesheetFile,
-                    stylesheetPath: $stylesheetPath,
-                    script: $scriptFile,
-                    scriptPath: $scriptPath,
-                    pageInfo: $pageInfo
+                    pageFile: $pageFile,
+                    pageAttributes: $pageInfo,
+                    pageStylesheetFile: $pageStylesheetFile,
+                    pageStylesheetPath: $pageStylesheetPath,
+                    pageScriptFile: $pageScriptFile,
+                    pageScriptPath: $pageScriptPath,
+                    layoutFile: $layoutFile,
+                    layoutStylesheetFile: $layoutStylesheetFile,
+                    layoutStylesheetPath: $layoutStylesheetPath,
+                    layoutScriptFile: $layoutScriptFile,
+                    layoutScriptPath: $layoutScriptPath,
+                    actionFile: $actionFile
                 );
             } else {
                 $path = implode('/', explode(DIRECTORY_SEPARATOR, $path));
@@ -131,14 +161,18 @@ readonly class DirectoryScanner
                 $results[] = new Route(
                     path: $path,
                     parent: $results[$index[$parentPath]] ?? null,
-                    page: $pageFile,
-                    layout: $layoutFile,
-                    action: $actionFile,
-                    stylesheet: $stylesheetFile,
-                    stylesheetPath: $stylesheetPath,
-                    script: $scriptFile,
-                    scriptPath: $scriptPath,
-                    pageInfo: $pageInfo
+                    pageFile: $pageFile,
+                    pageAttributes: $pageInfo,
+                    pageStylesheetFile: $pageStylesheetFile,
+                    pageStylesheetPath: $pageStylesheetPath,
+                    pageScriptFile: $pageScriptFile,
+                    pageScriptPath: $pageScriptPath,
+                    layoutFile: $layoutFile,
+                    layoutStylesheetFile: $layoutStylesheetFile,
+                    layoutStylesheetPath: $layoutStylesheetPath,
+                    layoutScriptFile: $layoutScriptFile,
+                    layoutScriptPath: $layoutScriptPath,
+                    actionFile: $actionFile
                 );
             }
 
