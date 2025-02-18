@@ -4,15 +4,15 @@ namespace Compass;
 
 use Compass\Attributes\Header;
 use Compass\Attributes\Lazy;
-use Compass\Attributes\PageMeta;
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\MetaInfo;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
 use Mosaic\AttributeHelper;
 use ReflectionException;
 
-class PageAttributesFactory
+class AttributesFactory
 {
     private AttributeHelper $attributeHelper;
 
@@ -26,13 +26,13 @@ class PageAttributesFactory
      * @param mixed $page
      * @param string|null $style
      * @param string|null $script
-     * @return PageAttributes
+     * @return Attributes
      * @throws ReflectionException
      */
-    public function create(mixed $page): PageAttributes
+    public function create(mixed $page): Attributes
     {
         $attributes = $this->attributeHelper->getAttributes($page);
-        return new PageAttributes(
+        return new Attributes(
             headers: $this->getHeaders($attributes),
             meta: $this->getMeta($attributes),
             styles: $this->getStyles($attributes),
@@ -58,12 +58,12 @@ class PageAttributesFactory
     }
 
     /**
-     * @return PageMeta|null
+     * @return MetaInfo|null
      */
-    private function getMeta(array $attributes): ?PageMeta
+    private function getMeta(array $attributes): ?MetaInfo
     {
         foreach ($attributes as $attribute) {
-            if ($attribute instanceof PageMeta) {
+            if ($attribute instanceof MetaInfo) {
                 return $attribute;
             }
         }
@@ -71,14 +71,14 @@ class PageAttributesFactory
     }
 
     /**
-     * @return PageScript[]
+     * @return Script[]
      */
     private function getScripts(array $attributes): array
     {
         $scripts = [];
 
         foreach ($attributes as $attribute) {
-            if ($attribute instanceof PageScript) {
+            if ($attribute instanceof Script) {
                 $scripts[] = $attribute;
             }
         }
@@ -87,14 +87,14 @@ class PageAttributesFactory
     }
 
     /**
-     * @return PageStyle[]
+     * @return Stylesheet[]
      */
     private function getStyles(array $attributes): array
     {
         $styles = [];
 
         foreach ($attributes as $attribute) {
-            if ($attribute instanceof PageStyle) {
+            if ($attribute instanceof Stylesheet) {
                 $styles[] = $attribute;
             }
         }

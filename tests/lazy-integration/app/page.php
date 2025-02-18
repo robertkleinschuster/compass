@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Compass\Attributes\PageMeta;
+use Compass\Attributes\MetaInfo;
 use Mosaic\Fragment;
 
-return #[PageMeta('de', 'Hello world!', '')] #[\Compass\Attributes\Reactive] function () {
+return #[MetaInfo('de', 'Hello world!', '')] #[\Compass\Attributes\Reactive] function () {
     yield new Fragment('<a href="/">root</a>');
     yield new Fragment('<a href="/about">about</a>');
     yield new Fragment('<a href="/about/test">about test</a>');

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Mosaic\Fragment;
 
-return #[\Compass\Attributes\Lazy] #[\Compass\Attributes\Reactive] #[\Compass\Attributes\PageMeta('de', 'imprint 2', '')] function () {
+return #[\Compass\Attributes\Lazy] #[\Compass\Attributes\Reactive] #[\Compass\Attributes\MetaInfo('de', 'imprint 2', '')] function () {
     yield new Fragment('<h2>imprint! 3</h2>');
     yield new Fragment('<a href="/">root</a>');
     yield new Fragment('<a href="/about">about</a>');

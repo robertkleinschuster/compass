@@ -4,28 +4,28 @@ namespace Compass;
 
 use Compass\Attributes\Header;
 use Compass\Attributes\Lazy;
-use Compass\Attributes\PageMeta;
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\MetaInfo;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
 
-class PageAttributes
+class Attributes
 {
-    private ?PageAttributes $parent = null;
+    private ?Attributes $parent = null;
 
     /**
      * @param Header[] $headers
-     * @param PageMeta|null $meta
-     * @param PageStyle[] $styles
-     * @param PageScript[] $scripts
+     * @param MetaInfo|null $meta
+     * @param Stylesheet[] $styles
+     * @param Script[] $scripts
      * @param Lazy|null $lazy
      * @param Resource|null $resource
      * @param Reactive|null $reactive
      */
     public function __construct(
         private array     $headers,
-        private ?PageMeta $meta,
+        private ?MetaInfo $meta,
         private array     $styles,
         private array     $scripts,
         private ?Lazy     $lazy,
@@ -37,7 +37,7 @@ class PageAttributes
 
     public static function __set_state(array $data): object
     {
-        return new PageAttributes(
+        return new Attributes(
           headers: $data['headers'],
           meta: $data['meta'],
           styles: $data['styles'],
@@ -53,11 +53,14 @@ class PageAttributes
         return $this->headers;
     }
 
-    public function getMeta(): ?PageMeta
+    public function getMeta(): ?MetaInfo
     {
         return $this->meta;
     }
 
+    /**
+     * @return Stylesheet[]
+     */
     public function getStyles(): array
     {
         if ($this->parent) {
@@ -70,6 +73,9 @@ class PageAttributes
         }
     }
 
+    /**
+     * @return Script[]
+     */
     public function getScripts(): array
     {
         if ($this->parent) {
@@ -97,8 +103,10 @@ class PageAttributes
         return $this->reactive;
     }
 
-    public function setParent(PageAttributes $parent): void
+    public function withParent(Attributes $parent): Attributes
     {
-        $this->parent = $parent;
+        $clone = clone $this;
+        $clone->parent = $parent;
+        return $clone;
     }
 }

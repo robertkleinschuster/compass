@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 use Compass\Attributes\Lazy;
-use Compass\Attributes\PageMeta;
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\MetaInfo;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Compass\Attributes\Reactive;
 use Mosaic\Fragment;
 
 return
     #[Lazy]
     #[Reactive]
-    #[PageMeta('de', 'About', '')]
-    #[PageScript('/test-script')]
-    #[PageStyle('/test-style')]
+    #[MetaInfo('de', 'About', '')]
+    #[Script('/test-script')]
+    #[Stylesheet('/test-style')]
     function () {
         yield new Fragment('<h2>about! 2</h2>');
         yield new Fragment('<a href="/">root</a>');

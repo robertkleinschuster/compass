@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\PageAttributesFactory;
+use Compass\AttributesFactory;
 use Mosaic\Renderer;
 use Compass\Route;
 use Compass\Page;
@@ -14,7 +14,7 @@ class PageTest extends TestCase
 {
     public function testRender()
     {
-        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
+        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
         $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
         $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
         $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/renderer/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/renderer/sub/child/layout.php');
@@ -26,7 +26,7 @@ class PageTest extends TestCase
 
     public function testRenderNoLayout()
     {
-        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer-no-layout/page.php');
+        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer-no-layout/page.php');
 
         $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', pageAttributes: $pageInfo);
 
@@ -37,7 +37,7 @@ class PageTest extends TestCase
 
     public function testRenderPartial()
     {
-        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
+        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
 
         $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
         $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
@@ -60,7 +60,7 @@ class PageTest extends TestCase
 
     public function testRenderLazy()
     {
-        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/lazy/sub/child/page.php');
+        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/lazy/sub/child/page.php');
 
         $root = new Route(path: '/', pageFile: __DIR__ . '/lazy/page.php', layoutFile: __DIR__ . '/lazy/layout.php');
         $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/lazy/sub/page.php', layoutFile: __DIR__ . '/lazy/sub/layout.php');

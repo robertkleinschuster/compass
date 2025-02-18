@@ -12,7 +12,7 @@ use SplFileInfo;
 
 readonly class DirectoryScanner
 {
-    private PageAttributesFactory $pageInfoFactory;
+    private AttributesFactory $pageInfoFactory;
 
     public function __construct(
         private string $pageFilename,
@@ -24,7 +24,7 @@ readonly class DirectoryScanner
         private string $actionFilename,
     )
     {
-        $this->pageInfoFactory = new PageAttributesFactory();
+        $this->pageInfoFactory = new AttributesFactory();
     }
 
     /**
@@ -135,19 +135,21 @@ readonly class DirectoryScanner
                 }
             }
 
-            $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
+            $pageAttributes = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
+            $layoutAttributes = isset($layoutFile) ? $this->pageInfoFactory->create(require $layoutFile) : null;
 
             if ($path === '') {
                 $path = '/';
                 $results[] = new Route(
                     path: $path,
                     pageFile: $pageFile,
-                    pageAttributes: $pageInfo,
+                    pageAttributes: $pageAttributes,
                     pageStylesheetFile: $pageStylesheetFile,
                     pageStylesheetPath: $pageStylesheetPath,
                     pageScriptFile: $pageScriptFile,
                     pageScriptPath: $pageScriptPath,
                     layoutFile: $layoutFile,
+                    layoutAttributes: $layoutAttributes,
                     layoutStylesheetFile: $layoutStylesheetFile,
                     layoutStylesheetPath: $layoutStylesheetPath,
                     layoutScriptFile: $layoutScriptFile,
@@ -167,12 +169,13 @@ readonly class DirectoryScanner
                     path: $path,
                     parent: $results[$index[$parentPath]] ?? null,
                     pageFile: $pageFile,
-                    pageAttributes: $pageInfo,
+                    pageAttributes: $pageAttributes,
                     pageStylesheetFile: $pageStylesheetFile,
                     pageStylesheetPath: $pageStylesheetPath,
                     pageScriptFile: $pageScriptFile,
                     pageScriptPath: $pageScriptPath,
                     layoutFile: $layoutFile,
+                    layoutAttributes: $layoutAttributes,
                     layoutStylesheetFile: $layoutStylesheetFile,
                     layoutStylesheetPath: $layoutStylesheetPath,
                     layoutScriptFile: $layoutScriptFile,

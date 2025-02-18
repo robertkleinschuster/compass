@@ -5,7 +5,7 @@ namespace Compass\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_ALL)]
-readonly class PageStyle
+readonly class Stylesheet
 {
     public function __construct(private string $href, private string $media = 'all')
     {
@@ -13,7 +13,7 @@ readonly class PageStyle
 
     public static function __set_state(array $data): object
     {
-        return new PageStyle(
+        return new Stylesheet(
             href: $data['href'],
             media: $data['media']
         );

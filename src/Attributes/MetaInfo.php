@@ -5,7 +5,7 @@ namespace Compass\Attributes;
 use Attribute;
 
 #[Attribute]
-readonly class PageMeta
+readonly class MetaInfo
 {
     public function __construct(
         private string $lang,
@@ -17,7 +17,7 @@ readonly class PageMeta
 
     public static function __set_state(array $data): object
     {
-        return new PageMeta(
+        return new MetaInfo(
             lang: $data['lang'],
             title: $data['title'],
             description: $data['description']

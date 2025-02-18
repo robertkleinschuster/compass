@@ -6,9 +6,9 @@ namespace Compass;
 
 use Compass\Attributes\Header;
 use Compass\Attributes\Lazy;
-use Compass\Attributes\PageMeta;
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\MetaInfo;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
 use Compass\Exception\InvalidPageRouteException;
@@ -30,10 +30,10 @@ readonly class Page implements Renderable
     private mixed $page;
     /** @var Header[] */
     private array $headers;
-    private ?PageMeta $meta;
-    /** @var PageStyle[] */
+    private ?MetaInfo $meta;
+    /** @var Stylesheet[] */
     private array $styles;
-    /** @var PageScript[] */
+    /** @var Script[] */
     private array $scripts;
     private ?Lazy $lazy;
     private ?Resource $resource;
@@ -57,22 +57,39 @@ readonly class Page implements Renderable
         $this->page = require $this->route->getPageFile();
         $this->headers = $this->route->getPageAttributes()->getHeaders();
         $this->meta = $this->route->getPageAttributes()->getMeta();
-        $styles = $this->route->getPageAttributes()->getStyles();
+        $styles = [];
+        $scripts = [new Script(Boundary::SCRIPT_PATH)];
         foreach ($this->route->getLayoutStylesheets() as $stylesheet) {
-            array_unshift($styles, new PageStyle($stylesheet));
+            $styles[] = new Stylesheet($stylesheet);
+        }
+        foreach ($this->route->getLayoutScripts() as $script) {
+            $scripts[] = new Script($script);
+        }
+        $layoutAttributes = $this->route->getLayoutAttributes();
+        if ($layoutAttributes !== null) {
+            foreach ($layoutAttributes->getStyles() as $style) {
+                $styles[] = $style;
+            }
+            foreach ($layoutAttributes->getScripts() as $script) {
+                $scripts[] = $script;
+            }
         }
         if ($this->route->getPageStylesheetPath() !== null) {
-            $styles[] = new PageStyle($this->route->getPageStylesheetPath());
-        }
-        $this->styles = $styles;
-        $scripts = $this->route->getPageAttributes()->getScripts();
-        $scripts[] = new PageScript(Boundary::SCRIPT_PATH);
-        foreach ($this->route->getLayoutScripts() as $script) {
-            array_unshift($scripts, new PageScript($script));
+            $styles[] = new Stylesheet($this->route->getPageStylesheetPath());
         }
         if ($this->route->getPageScriptPath() !== null) {
-            $scripts[] = new PageScript($this->route->getPageScriptPath());
+            $scripts[] = new Script($this->route->getPageScriptPath());
         }
+        $pageAttributes = $this->route->getPageAttributes();
+        if ($pageAttributes !== null) {
+            foreach ($pageAttributes->getStyles() as $style) {
+                $styles[] = $style;
+            }
+            foreach ($pageAttributes->getScripts() as $script) {
+                $scripts[] = $script;
+            }
+        }
+        $this->styles = $styles;
         $this->scripts = $scripts;
         $this->lazy = $this->route->getPageAttributes()->getLazy();
         $this->resource = $this->route->getPageAttributes()->getResource();

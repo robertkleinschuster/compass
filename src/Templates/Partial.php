@@ -2,8 +2,8 @@
 
 namespace Compass\Templates;
 
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Mosaic\Fragment;
 use Mosaic\Renderable;
 use Mosaic\Renderer;
@@ -13,8 +13,8 @@ class Partial implements Renderable
     /**
      * @param mixed $children
      * @param string $title
-     * @param PageScript[] $scripts
-     * @param PageStyle[] $styles
+     * @param Script[] $scripts
+     * @param Stylesheet[] $styles
      */
     public function __construct(
         private mixed  $children,

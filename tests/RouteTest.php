@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\PageAttributesFactory;
+use Compass\AttributesFactory;
 use Compass\Route;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +12,7 @@ class RouteTest extends TestCase
 {
     public function testShouldRestorableFromVarExport()
     {
-        $pageInfo = (new PageAttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
+        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 
         $startpage = new Route('/', layoutFile: 'layout');
         $about = new Route('/about', $startpage, pageFile: 'page', pageAttributes:  $pageInfo);

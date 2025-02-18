@@ -2,8 +2,8 @@
 
 namespace Compass\Templates;
 
-use Compass\Attributes\PageScript;
-use Compass\Attributes\PageStyle;
+use Compass\Attributes\Script;
+use Compass\Attributes\Stylesheet;
 use Mosaic\Fragment;
 use Mosaic\Renderable;
 use Mosaic\Renderer;
@@ -15,8 +15,8 @@ class Document implements Renderable
      * @param string $lang
      * @param string $title
      * @param string $description
-     * @param PageStyle[] $styles
-     * @param PageScript[] $scripts
+     * @param Stylesheet[] $styles
+     * @param Script[] $scripts
      */
     public function __construct(
         private mixed $children,
@@ -41,8 +41,8 @@ class Document implements Renderable
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>$this->title</title>
     <meta name="description" content="$this->description">
-    {$renderer->foreach($this->styles, fn(PageStyle $style) => new Fragment('<link rel="stylesheet" media="{media}" href="{href}">', href: $style->getHref(), media: $style->getMedia()))}
-    {$renderer->foreach($this->scripts, fn(PageScript $script) => 
+    {$renderer->foreach($this->styles, fn(Stylesheet $style) => new Fragment('<link rel="stylesheet" media="{media}" href="{href}">', href: $style->getHref(), media: $style->getMedia()))}
+    {$renderer->foreach($this->scripts, fn(Script $script) => 
         new Fragment($script->isModule() ? '<script type="module" src="{src}"></script>' : '<script src="{src}"></script>', src: $script->getSrc()))}
 </head>
 <body>

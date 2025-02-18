@@ -11,25 +11,23 @@ final class Route implements Stringable
     private ?string $cache = null;
 
     public function __construct(
-        private readonly string          $path,
-        private readonly ?Route          $parent = null,
-        private readonly ?string         $pageFile = null,
-        private readonly ?PageAttributes $pageAttributes = null,
-        private readonly ?string         $pageStylesheetFile = null,
-        private readonly ?string         $pageStylesheetPath = null,
-        private readonly ?string         $pageScriptFile = null,
-        private readonly ?string         $pageScriptPath = null,
-        private readonly ?string         $layoutFile = null,
-        private readonly ?string         $layoutStylesheetFile = null,
-        private readonly ?string         $layoutStylesheetPath = null,
-        private readonly ?string         $layoutScriptFile = null,
-        private readonly ?string         $layoutScriptPath = null,
-        private readonly ?string         $actionFile = null,
+        private readonly string      $path,
+        private readonly ?Route      $parent = null,
+        private readonly ?string     $pageFile = null,
+        private readonly ?Attributes $pageAttributes = null,
+        private readonly ?string     $pageStylesheetFile = null,
+        private readonly ?string     $pageStylesheetPath = null,
+        private readonly ?string     $pageScriptFile = null,
+        private readonly ?string     $pageScriptPath = null,
+        private readonly ?string     $layoutFile = null,
+        private readonly ?Attributes $layoutAttributes = null,
+        private readonly ?string     $layoutStylesheetFile = null,
+        private readonly ?string     $layoutStylesheetPath = null,
+        private readonly ?string     $layoutScriptFile = null,
+        private readonly ?string     $layoutScriptPath = null,
+        private readonly ?string     $actionFile = null,
     )
     {
-        if ($this->pageAttributes !== null && $this->parent?->getPageAttributes() !== null) {
-            $this->pageAttributes->setParent($this->parent->getPageAttributes());
-        }
     }
 
     /**
@@ -48,6 +46,7 @@ final class Route implements Stringable
             pageScriptFile: $data['pageScriptFile'],
             pageScriptPath: $data['pageScriptPath'],
             layoutFile: $data['layoutFile'],
+            layoutAttributes: $data['layoutAttributes'],
             layoutStylesheetFile: $data['layoutStylesheetFile'],
             layoutStylesheetPath: $data['layoutStylesheetPath'],
             layoutScriptFile: $data['layoutScriptFile'],
@@ -86,7 +85,7 @@ final class Route implements Stringable
         return $this->pageFile;
     }
 
-    public function getPageAttributes(): ?PageAttributes
+    public function getPageAttributes(): ?Attributes
     {
         return $this->pageAttributes;
     }
@@ -114,6 +113,14 @@ final class Route implements Stringable
     public function getLayoutFile(): ?string
     {
         return $this->layoutFile;
+    }
+
+    public function getLayoutAttributes(): ?Attributes
+    {
+        if ($this->parent?->layoutAttributes !== null && $this->layoutAttributes !== null) {
+            return $this->layoutAttributes?->withParent($this->parent->getLayoutAttributes());
+        }
+        return $this->layoutAttributes;
     }
 
     public function getLayoutStylesheetFile(): ?string
