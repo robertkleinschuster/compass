@@ -7,6 +7,7 @@ namespace Compass;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
 use SplFileInfo;
 
 readonly class DirectoryScanner
@@ -27,20 +28,12 @@ readonly class DirectoryScanner
     }
 
     /**
-     * @param string $directory
+     * @param string[] $directories
      * @return Route[]
+     * @throws ReflectionException
      */
-    public function scan(string $root): array
+    public function scan(array $directories): array
     {
-        $root = rtrim($root, DIRECTORY_SEPARATOR);
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                $root,
-                FilesystemIterator::SKIP_DOTS
-            )
-        );
-        $results = [];
-
         $pages = [];
         $layouts = [];
         $layoutStylesheets = [];
@@ -48,44 +41,55 @@ readonly class DirectoryScanner
         $actions = [];
         $stylesheets = [];
         $scripts = [];
-        $directories = [];
+        $paths = [];
 
-        /** @var SplFileInfo $item */
-        foreach ($iterator as $item) {
-            $path = substr($item->getPath(), strlen($root));
-            $directories[] = $path;
-            if ($item->getFilename() === $this->pageFilename) {
-                $pages[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->layoutFilename) {
-                $layouts[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->layoutStylesheetFilename) {
-                $layoutStylesheets[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->layoutScriptFilename) {
-                $layoutScripts[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->actionFilename) {
-                $actions[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->pageStylesheetFilename) {
-                $stylesheets[$path] = $item->getPathname();
-            }
-            if ($item->getFilename() === $this->pageScriptFilename) {
-                $scripts[$path] = $item->getPathname();
+        foreach ($directories as $directory) {
+            $directory = rtrim($directory, DIRECTORY_SEPARATOR);
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $directory,
+                    FilesystemIterator::SKIP_DOTS
+                )
+            );
+            $results = [];
+
+            /** @var SplFileInfo $item */
+            foreach ($iterator as $item) {
+                $path = substr($item->getPath(), strlen($directory));
+                $paths[] = $path;
+                if ($item->getFilename() === $this->pageFilename) {
+                    $pages[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->layoutFilename) {
+                    $layouts[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->layoutStylesheetFilename) {
+                    $layoutStylesheets[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->layoutScriptFilename) {
+                    $layoutScripts[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->actionFilename) {
+                    $actions[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->pageStylesheetFilename) {
+                    $stylesheets[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->pageScriptFilename) {
+                    $scripts[$path] = $item->getPathname();
+                }
             }
         }
 
-        $directories = array_unique($directories);
+        $paths = array_unique($paths);
 
         usort(
-            $directories,
+            $paths,
             fn(string $a, string $b) => count(explode(DIRECTORY_SEPARATOR, $a)) <=> count(explode(DIRECTORY_SEPARATOR, $b))
         );
 
         $index = [];
-        foreach ($directories as $i => $path) {
+        foreach ($paths as $i => $path) {
             $pageFile = $pages[$path] ?? null;
             $layoutFile = $layouts[$path] ?? null;
             $layoutStylesheetFile = $layoutStylesheets[$path] ?? null;
@@ -130,6 +134,7 @@ readonly class DirectoryScanner
                     $layoutScriptPath = "$path/$hash.js";
                 }
             }
+
             $pageInfo = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
 
             if ($path === '') {

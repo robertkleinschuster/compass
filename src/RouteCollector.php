@@ -21,7 +21,11 @@ class RouteCollector
      */
     private array $routes;
 
-    public function __construct(private readonly string $directory, private readonly ?RoutesCache $cache = null)
+    /**
+     * @param string[] $directories
+     * @param RoutesCache|null $cache
+     */
+    public function __construct(private readonly array $directories, private readonly ?RoutesCache $cache = null)
     {
         if ($this->cache) {
             $routes = $this->cache->load();
@@ -52,7 +56,7 @@ class RouteCollector
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan($this->directory);
+        $routes = $scanner->scan($this->directories);
         $routes[] = new Route(
             path: substr(Boundary::SCRIPT_PATH, 0, strlen(Boundary::SCRIPT_PATH) - 3),
             pageScriptFile: __DIR__ . '/Templates/client-router.js',

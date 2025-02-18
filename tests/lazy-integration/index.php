@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 
 require "vendor/autoload.php";
 
-$routeCollector = new RouteCollector(__DIR__ . '/app');
+$routeCollector = new RouteCollector([__DIR__ . '/app']);
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 foreach ($routeCollector->getRoutes() as $route) {

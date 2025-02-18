@@ -17,6 +17,27 @@ class DirectoryScannerTest extends TestCase
     public const LAYOUT_SCRIPT_FILENAME = 'layout.js';
     public const ACTION_FILENAME = 'action.php';
 
+    public function testShouldAllowOverridingByDefiningMultipleRoutes()
+    {
+        $scanner = new DirectoryScanner(
+            pageFilename: self::PAGE_FILENAME,
+            pageStylesheetFilename: self::PAGE_STYLESHEET_FILENAME,
+            pageScriptFilename: self::PAGE_SCRIPT_FILENAME,
+            layoutFilename: self::LAYOUT_FILENAME,
+            layoutStylesheetFilename: self::LAYOUT_STYLESHEET_FILENAME,
+            layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
+            actionFilename: self::ACTION_FILENAME
+        );
+        $routes = $scanner->scan([__DIR__ . '/pages', __DIR__ . '/pages-overrride']);
+        $this->assertCount(5, $routes);
+        $settings = $routes[3];
+        self::assertStringContainsString(__DIR__ . '/pages-overrride/', $settings->getPageFile());
+        $about = $routes[1];
+        self::assertStringContainsString( __DIR__ . '/pages-overrride/', $about->getPageFile());
+        self::assertStringContainsString( __DIR__ . '/pages/', $about->getPageScriptFile());
+        self::assertStringContainsString( __DIR__ . '/pages-overrride/', $about->getPageStylesheetFile());
+    }
+
 
     public function testShouldFindRoutesWithAPage()
     {
@@ -29,7 +50,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages');
+        $routes = $scanner->scan([__DIR__ . '/pages']);
         $this->assertCount(4, $routes);
 
         $startpage = $routes[0];
@@ -56,7 +77,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages');
+        $routes = $scanner->scan([__DIR__ . '/pages']);
         $this->assertCount(4, $routes);
 
         $startpage = $routes[0];
@@ -81,7 +102,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/actions');
+        $routes = $scanner->scan([__DIR__ . '/actions']);
         $this->assertCount(2, $routes);
 
         $startpage = $routes[0];
@@ -102,7 +123,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages/');
+        $routes = $scanner->scan([__DIR__ . '/pages/']);
         $this->assertCount(4, $routes);
 
         $startpage = $routes[0];
@@ -127,7 +148,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages');
+        $routes = $scanner->scan([__DIR__ . '/pages']);
 
         $startpage = $routes[0];
         $about = $routes[1];
@@ -152,7 +173,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages');
+        $routes = $scanner->scan([__DIR__ . '/pages']);
 
         $root = $routes[0];
         $about = $routes[1];
@@ -179,7 +200,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages-no-startpage');
+        $routes = $scanner->scan([__DIR__ . '/pages-no-startpage']);
 
         $users = $routes[0];
         $userId = $routes[1];
@@ -199,7 +220,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages-no-parent');
+        $routes = $scanner->scan([__DIR__ . '/pages-no-parent']);
 
         $userId = $routes[0];
 
@@ -217,7 +238,7 @@ class DirectoryScannerTest extends TestCase
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan(__DIR__ . '/pages-no-intermediate');
+        $routes = $scanner->scan([__DIR__ . '/pages-no-intermediate']);
 
         $startpage = $routes[0];
         $userId = $routes[1];
