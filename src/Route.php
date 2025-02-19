@@ -118,7 +118,7 @@ final class Route implements Stringable
     public function getLayoutAttributes(): ?Attributes
     {
         if ($this->parent?->layoutAttributes !== null && $this->layoutAttributes !== null) {
-            return $this->layoutAttributes?->withParent($this->parent->getLayoutAttributes());
+            return $this->layoutAttributes->withParent($this->parent->getLayoutAttributes());
         }
         return $this->layoutAttributes;
     }

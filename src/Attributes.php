@@ -35,7 +35,11 @@ class Attributes
     {
     }
 
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, mixed> $data
+     * @return Attributes
+     */
+    public static function __set_state(array $data): Attributes
     {
         return new Attributes(
           headers: $data['headers'],
@@ -48,6 +52,9 @@ class Attributes
         );
     }
 
+    /**
+     * @return Header[]
+     */
     public function getHeaders(): array
     {
         return $this->headers;

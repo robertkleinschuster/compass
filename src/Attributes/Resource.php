@@ -7,7 +7,11 @@ use Attribute;
 #[Attribute]
 class Resource
 {
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, mixed> $data
+     * @return Resource
+     */
+    public static function __set_state(array $data): Resource
     {
         return new Resource();
     }

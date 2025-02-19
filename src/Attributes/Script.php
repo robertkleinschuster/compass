@@ -11,7 +11,11 @@ readonly class Script
     {
     }
 
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, mixed> $data
+     * @return Script
+     */
+    public static function __set_state(array $data): Script
     {
         return new Script(
             src: $data['src'],

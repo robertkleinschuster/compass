@@ -7,18 +7,21 @@ namespace CompassTest;
 use Compass\AttributesFactory;
 use Compass\Route;
 use Compass\RoutesCache;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class RoutesCacheTest extends TestCase
 {
-    public function testShouldReturnNullWhenCacheNotSaved()
+    #[Test]
+    public function shouldReturnNullWhenCacheNotSaved()
     {
         $cache = new RoutesCache(__DIR__ . '/routes-cache.php');
         $cache->clear();
         $this->assertNull($cache->load());
     }
 
-    public function testShouldSaveAndLoadRoutes()
+    #[Test]
+    public function shouldSaveAndLoadRoutes()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 

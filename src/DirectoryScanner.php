@@ -51,7 +51,6 @@ readonly class DirectoryScanner
                     FilesystemIterator::SKIP_DOTS
                 )
             );
-            $results = [];
 
             /** @var SplFileInfo $item */
             foreach ($iterator as $item) {
@@ -88,6 +87,7 @@ readonly class DirectoryScanner
             fn(string $a, string $b) => count(explode(DIRECTORY_SEPARATOR, $a)) <=> count(explode(DIRECTORY_SEPARATOR, $b))
         );
 
+        $results = [];
         $index = [];
         foreach ($paths as $i => $path) {
             $pageFile = $pages[$path] ?? null;
@@ -167,7 +167,7 @@ readonly class DirectoryScanner
 
                 $results[] = new Route(
                     path: $path,
-                    parent: $results[$index[$parentPath]] ?? null,
+                    parent: isset($index[$parentPath]) ? $results[$index[$parentPath]] ?? null : null,
                     pageFile: $pageFile,
                     pageAttributes: $pageAttributes,
                     pageStylesheetFile: $pageStylesheetFile,

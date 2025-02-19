@@ -80,14 +80,11 @@ readonly class Page implements Renderable
         if ($this->route->getPageScriptPath() !== null) {
             $scripts[] = new Script($this->route->getPageScriptPath());
         }
-        $pageAttributes = $this->route->getPageAttributes();
-        if ($pageAttributes !== null) {
-            foreach ($pageAttributes->getStyles() as $style) {
-                $styles[] = $style;
-            }
-            foreach ($pageAttributes->getScripts() as $script) {
-                $scripts[] = $script;
-            }
+        foreach ($this->route->getPageAttributes()->getStyles() as $style) {
+            $styles[] = $style;
+        }
+        foreach ($this->route->getPageAttributes()->getScripts() as $script) {
+            $scripts[] = $script;
         }
         $this->styles = $styles;
         $this->scripts = $scripts;
@@ -99,7 +96,8 @@ readonly class Page implements Renderable
     /**
      * @return Header[]
      */
-    public function getHeaders(): array
+    public
+    function getHeaders(): array
     {
         return $this->headers;
     }
@@ -114,7 +112,8 @@ readonly class Page implements Renderable
      * @throws RenderException
      * @throws Throwable
      */
-    public function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
+    public
+    function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
     {
         if ($route->getLayoutFile() !== null) {
             $layout = require $route->getLayoutFile();
@@ -148,7 +147,8 @@ readonly class Page implements Renderable
      * @throws RenderException
      * @throws Throwable
      */
-    public function render(Renderer $renderer, $data): iterable
+    public
+    function render(Renderer $renderer, $data): iterable
     {
         try {
             $partial = $this->queryParams[self::PARTIAL_PARAM] ?? null;

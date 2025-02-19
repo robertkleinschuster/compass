@@ -15,7 +15,11 @@ readonly class MetaInfo
     {
     }
 
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, string> $data
+     * @return MetaInfo
+     */
+    public static function __set_state(array $data): MetaInfo
     {
         return new MetaInfo(
             lang: $data['lang'],

@@ -24,8 +24,6 @@ class AttributesFactory
 
     /**
      * @param mixed $page
-     * @param string|null $style
-     * @param string|null $script
      * @return Attributes
      * @throws ReflectionException
      */
@@ -44,6 +42,7 @@ class AttributesFactory
     }
 
     /**
+     * @param object[] $attributes
      * @return Header[]
      */
     private function getHeaders(array $attributes): array
@@ -58,6 +57,7 @@ class AttributesFactory
     }
 
     /**
+     * @param object[] $attributes
      * @return MetaInfo|null
      */
     private function getMeta(array $attributes): ?MetaInfo
@@ -71,6 +71,7 @@ class AttributesFactory
     }
 
     /**
+     * @param object[] $attributes
      * @return Script[]
      */
     private function getScripts(array $attributes): array
@@ -87,6 +88,7 @@ class AttributesFactory
     }
 
     /**
+     * @param object[] $attributes
      * @return Stylesheet[]
      */
     private function getStyles(array $attributes): array
@@ -102,6 +104,10 @@ class AttributesFactory
         return $styles;
     }
 
+    /**
+     * @param object[] $attributes
+     * @return Resource|null
+     */
     private function getResource(array $attributes): ?Resource
     {
         foreach ($attributes as $attribute) {
@@ -113,6 +119,10 @@ class AttributesFactory
 
     }
 
+    /**
+     * @param object[] $attributes
+     * @return Reactive|null
+     */
     private function getReactive(array $attributes): ?Reactive
     {
         foreach ($attributes as $attribute) {
@@ -123,6 +133,10 @@ class AttributesFactory
         return null;
     }
 
+    /**
+     * @param object[] $attributes
+     * @return Lazy|null
+     */
     private function getLazy(array $attributes): ?Lazy
     {
         foreach ($attributes as $attribute) {

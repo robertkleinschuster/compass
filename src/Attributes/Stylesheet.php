@@ -11,7 +11,11 @@ readonly class Stylesheet
     {
     }
 
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, string> $data
+     * @return Stylesheet
+     */
+    public static function __set_state(array $data): Stylesheet
     {
         return new Stylesheet(
             href: $data['href'],

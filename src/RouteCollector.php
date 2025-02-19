@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Compass;
 
 use Compass\Templates\Boundary;
+use ReflectionException;
 
 class RouteCollector
 {
-    public const PAGE_FILENAME = 'page.php';
-    public const PAGE_SCRIPT_FILENAME = 'page.js';
-    public const PAGE_STYLESHEET_FILENAME = 'page.css';
-    public const LAYOUT_FILENAME = 'layout.php';
-    public const LAYOUT_STYLESHEET_FILENAME = 'layout.css';
-    public const LAYOUT_SCRIPT_FILENAME = 'layout.js';
-    public const ACTION_FILENAME = 'action.php';
+    public const string PAGE_FILENAME = 'page.php';
+    public const string PAGE_SCRIPT_FILENAME = 'page.js';
+    public const string PAGE_STYLESHEET_FILENAME = 'page.css';
+    public const string LAYOUT_FILENAME = 'layout.php';
+    public const string LAYOUT_STYLESHEET_FILENAME = 'layout.css';
+    public const string LAYOUT_SCRIPT_FILENAME = 'layout.js';
+    public const string ACTION_FILENAME = 'action.php';
 
     /**
      * @var Route[]
@@ -45,6 +46,10 @@ class RouteCollector
         $this->cache?->save($this->routes);
     }
 
+    /**
+     * @return Route[]
+     * @throws ReflectionException
+     */
     private function findRoutes(): array
     {
         $scanner = new DirectoryScanner(

@@ -14,7 +14,11 @@ class Lazy
     {
     }
 
-    public static function __set_state(array $data): object
+    /**
+     * @param array<string, mixed> $data
+     * @return Lazy
+     */
+    public static function __set_state(array $data): Lazy
     {
         return new Lazy(
             loading: $data['loading']

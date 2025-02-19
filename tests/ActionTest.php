@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace CompassTest;
 
 use Compass\Action;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Compass\Route;
 
 class ActionTest extends TestCase
 {
-    public function testShouldInvokeActionWithParams()
+    #[Test]
+    public function shouldInvokeActionWithParams()
     {
         $route = new Route(path: '', actionFile: __DIR__ . '/actions/action.php');
         $handler = new Action($route, ['id' => '1'], [], []);

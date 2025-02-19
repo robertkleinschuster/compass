@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CompassTest;
 
 use Compass\DirectoryScanner;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class DirectoryScannerTest extends TestCase
@@ -17,7 +18,8 @@ class DirectoryScannerTest extends TestCase
     public const LAYOUT_SCRIPT_FILENAME = 'layout.js';
     public const ACTION_FILENAME = 'action.php';
 
-    public function testShouldAllowOverridingByDefiningMultipleRoutes()
+    #[Test]
+    public function shouldAllowOverridingByDefiningMultipleRoutes()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -38,8 +40,8 @@ class DirectoryScannerTest extends TestCase
         self::assertStringContainsString( __DIR__ . '/pages-overrride/', $about->getPageStylesheetFile());
     }
 
-
-    public function testShouldFindRoutesWithAPage()
+    #[Test]
+    public function shouldFindRoutesWithAPage()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -65,7 +67,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertEquals(__DIR__ . '/pages/users/[id]/page.php', $userId->getPageFile());
     }
 
-    public function testShouldSetLayoutFlagToEachPage()
+    #[Test]
+    public function shouldSetLayoutFlagToEachPage()
     {
 
         $scanner = new DirectoryScanner(
@@ -91,7 +94,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertNull($userId->getLayoutFile());
     }
 
-    public function testShouldFindActionForRoutes()
+    #[Test]
+    public function shouldFindActionForRoutes()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -112,7 +116,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertNull($child->getActionFile());
     }
 
-    public function testShouldIgnoreTrailingSlashesInDirectory()
+    #[Test]
+    public function shouldIgnoreTrailingSlashesInDirectory()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -137,7 +142,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertEquals('/users/[id]', $userId->getPath());
     }
 
-    public function testShouldSetTheParentToEachPage()
+    #[Test]
+    public function shouldSetTheParentToEachPage()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -162,7 +168,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertEquals($startpage, $userId->getParent()->getParent());
     }
 
-    public function testShouldSetScriptAndStylesheetPath()
+    #[Test]
+    public function shouldSetScriptAndStylesheetPath()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -189,7 +196,8 @@ class DirectoryScannerTest extends TestCase
         self::assertNull($users->getPageScriptPath());
     }
 
-    public function testShouldSetTheParentToEachPageWhenStartpageIsMissing()
+    #[Test]
+    public function shouldSetTheParentToEachPageWhenStartpageIsMissing()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -209,7 +217,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertEquals($users, $userId->getParent());
     }
 
-    public function testShouldSetTheParentNullWhenThereIsNone()
+    #[Test]
+    public function shouldSetTheParentNullWhenThereIsNone()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,
@@ -227,7 +236,8 @@ class DirectoryScannerTest extends TestCase
         $this->assertNull($userId->getParent());
     }
 
-    public function testShouldSetTheParentToNextHigherLevelWhenMissingIntermediate()
+    #[Test]
+    public function shouldSetTheParentToNextHigherLevelWhenMissingIntermediate()
     {
         $scanner = new DirectoryScanner(
             pageFilename: self::PAGE_FILENAME,

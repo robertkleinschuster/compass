@@ -8,10 +8,12 @@ use Compass\AttributesFactory;
 use Mosaic\Renderer;
 use Compass\Route;
 use Compass\Page;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class PageTest extends TestCase
 {
+    #[Test]
     public function testRender()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
@@ -24,6 +26,7 @@ class PageTest extends TestCase
         $this->assertStringContainsString('<root><sub><child id="1">page 1 /sub/child</child></sub></root>', (string)$result);
     }
 
+    #[Test]
     public function testRenderNoLayout()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer-no-layout/page.php');
@@ -35,6 +38,7 @@ class PageTest extends TestCase
         $this->assertStringContainsString('page 1', (string)$result);
     }
 
+    #[Test]
     public function testRenderPartial()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
@@ -58,6 +62,7 @@ class PageTest extends TestCase
         $this->assertStringContainsString('<template data-title=""><root><sub><child id="1">page 1 /sub/child</child></sub></root></template>', (string)$result);
     }
 
+    #[Test]
     public function testRenderLazy()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/lazy/sub/child/page.php');

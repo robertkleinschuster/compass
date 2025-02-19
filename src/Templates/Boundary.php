@@ -7,10 +7,10 @@ namespace Compass\Templates;
 use Mosaic\Renderable;
 use Mosaic\Renderer;
 
-class Boundary implements Renderable
+readonly class Boundary implements Renderable
 {
-    public const SCRIPT_PATH = '/.client-router.js';
-    public const CONTENT_ONLY_PARTIAL = '.';
+    public const string SCRIPT_PATH = '/.client-router.js';
+    public const string CONTENT_ONLY_PARTIAL = '.';
 
     public function __construct(
         private mixed $children,
@@ -29,6 +29,9 @@ class Boundary implements Renderable
         yield $renderer->fragment('</route-boundary>');
     }
 
+    /**
+     * @return string[]
+     */
     protected function buildAttributes(): array
     {
         $attributes = [];

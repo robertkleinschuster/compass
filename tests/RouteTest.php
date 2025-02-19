@@ -6,11 +6,13 @@ namespace CompassTest;
 
 use Compass\AttributesFactory;
 use Compass\Route;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class RouteTest extends TestCase
 {
-    public function testShouldRestorableFromVarExport()
+    #[Test]
+    public function shouldRestorableFromVarExport()
     {
         $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
 
