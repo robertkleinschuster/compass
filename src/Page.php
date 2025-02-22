@@ -95,8 +95,7 @@ readonly class Page implements Renderable
     /**
      * @return Header[]
      */
-    public
-    function getHeaders(): array
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -111,8 +110,7 @@ readonly class Page implements Renderable
      * @throws RenderException
      * @throws Throwable
      */
-    public
-    function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
+    public function renderLayout(Renderer $renderer, Route $route, mixed $children, array $args, ?string $partial): mixed
     {
         if ($route->getLayoutFile() !== null) {
             $layout = require $route->getLayoutFile();
@@ -146,13 +144,12 @@ readonly class Page implements Renderable
      * @throws RenderException
      * @throws Throwable
      */
-    public
-    function render(Renderer $renderer, $data): iterable
+    public function render(Renderer $renderer, $data): iterable
     {
         try {
             $partial = $this->queryParams[self::PARTIAL_PARAM] ?? null;
 
-            $args = $renderer->args($data ?? []);
+            $args = (array)$data;
             $args['route'] = $this->route;
             $args['partial'] = $partial;
             $args['uri'] = $this->uri;
@@ -170,7 +167,7 @@ readonly class Page implements Renderable
                         if (!str_starts_with($this->route->getPath(), $partial)) {
                             throw new InvalidPartialException(sprintf('Invalid partial `%s` for route `%s`', $partial, $this->route->getPath()));
                         }
-                        $view = $this->renderLayout($renderer, $this->route, $this->page, (array)$args, $partial);
+                        $view = $this->renderLayout($renderer, $this->route, $this->page, $args, $partial);
                     }
 
                     $view = new Partial(
@@ -188,7 +185,7 @@ readonly class Page implements Renderable
                         $page = $this->page;
                     }
 
-                    $view = $this->renderLayout($renderer, $this->route, $page, (array)$args, $partial);
+                    $view = $this->renderLayout($renderer, $this->route, $page, $args, $partial);
 
                     $view = new Document(
                         children: $view,
