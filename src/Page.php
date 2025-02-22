@@ -18,7 +18,6 @@ use Compass\Templates\Document;
 use Compass\Templates\Partial;
 use Error;
 use Mosaic\Exception\RenderException;
-use Mosaic\Helper\Arguments;
 use Mosaic\Renderable;
 use Mosaic\Renderer;
 use ReflectionException;
@@ -153,7 +152,7 @@ readonly class Page implements Renderable
         try {
             $partial = $this->queryParams[self::PARTIAL_PARAM] ?? null;
 
-            $args = new Arguments($data ?? []);
+            $args = $renderer->args($data ?? []);
             $args['route'] = $this->route;
             $args['partial'] = $partial;
             $args['uri'] = $this->uri;
