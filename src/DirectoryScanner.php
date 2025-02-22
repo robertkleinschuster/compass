@@ -39,8 +39,8 @@ readonly class DirectoryScanner
         $layoutStylesheets = [];
         $layoutScripts = [];
         $actions = [];
-        $stylesheets = [];
-        $scripts = [];
+        $pageStylesheets = [];
+        $pageScripts = [];
         $paths = [];
 
         foreach ($directories as $directory) {
@@ -55,9 +55,15 @@ readonly class DirectoryScanner
             /** @var SplFileInfo $item */
             foreach ($iterator as $item) {
                 $path = substr($item->getPath(), strlen($directory));
-                $paths[] = $path;
+                $paths[$path] = $path;
                 if ($item->getFilename() === $this->pageFilename) {
                     $pages[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->pageStylesheetFilename) {
+                    $pageStylesheets[$path] = $item->getPathname();
+                }
+                if ($item->getFilename() === $this->pageScriptFilename) {
+                    $pageScripts[$path] = $item->getPathname();
                 }
                 if ($item->getFilename() === $this->layoutFilename) {
                     $layouts[$path] = $item->getPathname();
@@ -71,16 +77,10 @@ readonly class DirectoryScanner
                 if ($item->getFilename() === $this->actionFilename) {
                     $actions[$path] = $item->getPathname();
                 }
-                if ($item->getFilename() === $this->pageStylesheetFilename) {
-                    $stylesheets[$path] = $item->getPathname();
-                }
-                if ($item->getFilename() === $this->pageScriptFilename) {
-                    $scripts[$path] = $item->getPathname();
-                }
             }
         }
 
-        $paths = array_unique($paths);
+        $paths = array_values($paths);
 
         usort(
             $paths,
@@ -88,59 +88,26 @@ readonly class DirectoryScanner
         );
 
         $results = [];
-        $index = [];
+
         foreach ($paths as $i => $path) {
             $pageFile = $pages[$path] ?? null;
+            $pageScriptFile = $pageScripts[$path] ?? null;
+            $pageStylesheetFile = $pageStylesheets[$path] ?? null;
             $layoutFile = $layouts[$path] ?? null;
             $layoutStylesheetFile = $layoutStylesheets[$path] ?? null;
             $layoutScriptFile = $layoutScripts[$path] ?? null;
             $actionFile = $actions[$path] ?? null;
-            $pageStylesheetFile = $stylesheets[$path] ?? null;
-            $pageScriptFile = $scripts[$path] ?? null;
-            $pageStylesheetPath = null;
-            if ($pageStylesheetFile !== null) {
-                $hash = hash_file('crc32c', $pageStylesheetFile);
-                if ($hash === '00000000') {
-                    $pageStylesheetFile = null;
-                } else {
-                    $pageStylesheetPath = "$path/$hash.css";
-                }
-            }
-            $pageScriptPath = null;
-            if ($pageScriptFile !== null) {
-                $hash = hash_file('crc32c', $pageScriptFile);
-                if ($hash === '00000000') {
-                    $pageScriptFile = null;
-                } else {
-                    $pageScriptPath = "$path/$hash.js";
-                }
-            }
 
-            $layoutStylesheetPath = null;
-            if ($layoutStylesheetFile !== null) {
-                $hash = hash_file('crc32c', $layoutStylesheetFile);
-                if ($hash === '00000000') {
-                    $layoutStylesheetFile = null;
-                } else {
-                    $layoutStylesheetPath = "$path/$hash.css";
-                }
-            }
-            $layoutScriptPath = null;
-            if ($layoutScriptFile !== null) {
-                $hash = hash_file('crc32c', $layoutScriptFile);
-                if ($hash === '00000000') {
-                    $layoutScriptFile = null;
-                } else {
-                    $layoutScriptPath = "$path/$hash.js";
-                }
-            }
-
+            $pageStylesheetPath = $this->buildAssetPath($pageStylesheetFile, $path, 'css');
+            $pageScriptPath = $this->buildAssetPath($pageScriptFile, $path, 'js');
+            $layoutStylesheetPath = $this->buildAssetPath($layoutStylesheetFile, $path, 'css');
+            $layoutScriptPath = $this->buildAssetPath($layoutScriptFile, $path, 'js');
             $pageAttributes = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
             $layoutAttributes = isset($layoutFile) ? $this->pageInfoFactory->create(require $layoutFile) : null;
 
             if ($path === '') {
                 $path = '/';
-                $results[] = new Route(
+                $results[$path] = new Route(
                     path: $path,
                     pageFile: $pageFile,
                     pageAttributes: $pageAttributes,
@@ -163,11 +130,11 @@ readonly class DirectoryScanner
                 do {
                     $parentPath = dirname($path, $parentLevels);
                     $parentLevels++;
-                } while ((!isset($index[$parentPath]) || !isset($results[$index[$parentPath]])) && $parentPath !== '/');
+                } while (!isset($results[$parentPath]) && $parentPath !== '/');
 
-                $results[] = new Route(
+                $results[$path] = new Route(
                     path: $path,
-                    parent: isset($index[$parentPath]) ? $results[$index[$parentPath]] ?? null : null,
+                    parent: $results[$parentPath] ?? null,
                     pageFile: $pageFile,
                     pageAttributes: $pageAttributes,
                     pageStylesheetFile: $pageStylesheetFile,
@@ -183,11 +150,20 @@ readonly class DirectoryScanner
                     actionFile: $actionFile
                 );
             }
-
-            $index[$path] = $i;
         }
 
 
-        return $results;
+        return array_values($results);
+    }
+
+    private function buildAssetPath(?string $asset, string $path, string $extension): ?string
+    {
+        if ($asset !== null) {
+            $hash = hash_file('crc32c', $asset);
+            if ($hash !== '00000000') {
+                return "$path/$hash.$extension";
+            }
+        }
+        return null;
     }
 }

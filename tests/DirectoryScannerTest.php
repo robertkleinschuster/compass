@@ -192,7 +192,7 @@ class DirectoryScannerTest extends TestCase
         self::assertSame('/about/e935a539.js', $about->getPageScriptPath());
         self::assertSame(__DIR__ . '/pages/about/page.css', $about->getPageStylesheetFile());
         self::assertSame('/about/d2ecffa0.css', $about->getPageStylesheetPath());
-        self::assertNull($users->getPageScriptFile());
+        self::assertSame(__DIR__ . '/pages/users/page.js', $users->getPageScriptFile());
         self::assertNull($users->getPageScriptPath());
     }
 

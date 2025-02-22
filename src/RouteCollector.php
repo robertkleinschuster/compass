@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Compass;
 
-use Compass\Templates\Boundary;
+use Compass\Templates\Layer;
 use ReflectionException;
 
 class RouteCollector
@@ -61,11 +61,17 @@ class RouteCollector
             layoutScriptFilename: self::LAYOUT_SCRIPT_FILENAME,
             actionFilename: self::ACTION_FILENAME
         );
-        $routes = $scanner->scan($this->directories);
+        $routes = $scanner->scan([
+            dirname(__DIR__) . DIRECTORY_SEPARATOR . 'routes',
+            ...$this->directories
+        ]);
         $routes[] = new Route(
-            path: substr(Boundary::SCRIPT_PATH, 0, strlen(Boundary::SCRIPT_PATH) - 3),
-            pageScriptFile: __DIR__ . '/Templates/client-router.js',
-            pageScriptPath: Boundary::SCRIPT_PATH
+            pageScriptFile: dirname(__DIR__) . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'runtime.js',
+            pageScriptPath: Layer::SCRIPT_PATH
+        );
+        $routes[] = new Route(
+            pageStylesheetFile: dirname(__DIR__) . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'reset.css',
+            pageStylesheetPath: '/.reset.css'
         );
         return $routes;
     }

@@ -13,7 +13,7 @@ use Compass\Attributes\Reactive;
 use Compass\Attributes\Resource;
 use Compass\Exception\InvalidPageRouteException;
 use Compass\Exception\InvalidPartialException;
-use Compass\Templates\Boundary;
+use Compass\Templates\Layer;
 use Compass\Templates\Document;
 use Compass\Templates\Partial;
 use Error;
@@ -57,8 +57,8 @@ readonly class Page implements Renderable
         $this->page = require $this->route->getPageFile();
         $this->headers = $this->route->getPageAttributes()->getHeaders();
         $this->meta = $this->route->getPageAttributes()->getMeta();
-        $styles = [];
-        $scripts = [new Script(Boundary::SCRIPT_PATH)];
+        $styles = [new Stylesheet('/.reset.css')];
+        $scripts = [new Script(Layer::SCRIPT_PATH)];
         foreach ($this->route->getLayoutStylesheets() as $stylesheet) {
             $styles[] = new Stylesheet($stylesheet);
         }
@@ -124,7 +124,7 @@ readonly class Page implements Renderable
         }
 
         if ($this->reactive) {
-            $children = new Boundary($children, $route->getPath());
+            $children = new Layer($children, $route->getPath());
         }
 
         if ($partial === $route->getPath()) {
@@ -165,7 +165,7 @@ readonly class Page implements Renderable
             } else {
                 if ($partial) {
 
-                    if ($partial === Boundary::CONTENT_ONLY_PARTIAL) {
+                    if ($partial === Layer::CONTENT_ONLY_PARTIAL) {
                         $view = $this->page;
                     } else {
                         if (!str_starts_with($this->route->getPath(), $partial)) {
@@ -184,7 +184,7 @@ readonly class Page implements Renderable
                 } else {
 
                     if ($this->lazy) {
-                        $page = new Boundary($this->lazy->getLoading() ?? '', Boundary::CONTENT_ONLY_PARTIAL, true);
+                        $page = new Layer($this->lazy->getLoading() ?? '', Layer::CONTENT_ONLY_PARTIAL, true);
                     } else {
                         $page = $this->page;
                     }

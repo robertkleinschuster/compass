@@ -7,9 +7,9 @@ namespace Compass\Templates;
 use Mosaic\Renderable;
 use Mosaic\Renderer;
 
-readonly class Boundary implements Renderable
+readonly class Layer implements Renderable
 {
-    public const string SCRIPT_PATH = '/.client-router.js';
+    public const string SCRIPT_PATH = '/.runtime.js';
     public const string CONTENT_ONLY_PARTIAL = '.';
 
     public function __construct(
@@ -22,11 +22,11 @@ readonly class Boundary implements Renderable
     public function render(Renderer $renderer, mixed $data)
     {
         yield $renderer->fragment(sprintf(
-            '<route-boundary %s>',
+            '<route-layer %s>',
             implode(' ', $this->buildAttributes())
         ));
         yield $this->children;
-        yield $renderer->fragment('</route-boundary>');
+        yield $renderer->fragment('</route-layer>');
     }
 
     /**

@@ -11,7 +11,7 @@ final class Route implements Stringable
     private ?string $cache = null;
 
     public function __construct(
-        private readonly string      $path,
+        private readonly ?string     $path = null,
         private readonly ?Route      $parent = null,
         private readonly ?string     $pageFile = null,
         private readonly ?Attributes $pageAttributes = null,
@@ -65,12 +65,7 @@ final class Route implements Stringable
         $this->cache = $cache;
     }
 
-    public function getName(): string
-    {
-        return $this->path;
-    }
-
-    public function getPath(): string
+    public function getPath(): ?string
     {
         return $this->path;
     }
@@ -180,6 +175,6 @@ final class Route implements Stringable
 
     public function __toString(): string
     {
-        return $this->getName();
+        return $this->getPath() ?? '';
     }
 }

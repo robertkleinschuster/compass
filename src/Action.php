@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Compass;
 
+use Compass\Exception\InvalidActionRouteException;
 use Error;
 use ReflectionException;
 use ReflectionFunction;
@@ -19,6 +20,9 @@ readonly class Action
      */
     public function __construct(private Route $route, private array $params, private array $queryParams, private array $parsedBody)
     {
+        if ($this->route->getActionFile() === null) {
+            throw new InvalidActionRouteException(sprintf('Route with path `%s` has no action.', $this->route->getPath()));
+        }
     }
 
     /**

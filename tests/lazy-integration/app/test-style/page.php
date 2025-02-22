@@ -5,7 +5,7 @@ body {
     background: #e3dfd9;
     font-family: sans-serif;
 }
-route-boundary {
+route-layer {
     display: flex;
     flex-direction: column;
 }
