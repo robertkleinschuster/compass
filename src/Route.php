@@ -24,11 +24,15 @@ final class Route implements Stringable
      */
     public static function __set_state(array $data): Route
     {
-        return new Route(
+        $route = new Route(
             path: $data['path'],
             page: $data['page'],
             actionFile: $data['actionFile'],
         );
+
+        $route->setCache($data['cache']);
+
+        return $route;
     }
 
     public function getCache(): ?string
@@ -50,7 +54,7 @@ final class Route implements Stringable
     {
         return $this->page;
     }
-    
+
     public function getActionFile(): ?string
     {
         return $this->actionFile;
