@@ -13,8 +13,8 @@ return
     #[Lazy]
     #[Reactive]
     #[MetaInfo('de', 'About', '')]
-    #[Script('/test-script')]
-    #[Stylesheet('/test-style')]
+    #[Script(__DIR__ . '/script.js')]
+    #[Stylesheet(__DIR__ . '/styles.css')]
     function () {
         yield new Fragment('<h2>about! 2</h2>');
         yield new Fragment('<a href="/">root</a>');

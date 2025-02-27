@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\AttributesFactory;
+use Compass\EntrypointFactory;
 use Compass\Route;
 use Compass\RoutesCache;
 use PHPUnit\Framework\Attributes\Test;
@@ -23,9 +23,9 @@ class RoutesCacheTest extends TestCase
     #[Test]
     public function shouldSaveAndLoadRoutes()
     {
-        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/pages/page.php', null, null);
+        $pageInfo = (new EntrypointFactory())->createPage(__DIR__ . '/pages/page.php', null);
 
-        $route = new Route( path: '/', pageAttributes: $pageInfo);
+        $route = new Route( path: '/', page: $pageInfo);
         $cache = new RoutesCache(__DIR__ . '/routes-cache.php');
         $cache->save([$route]);
         $routes = $cache->load();

@@ -41,9 +41,9 @@ class Document implements Renderable
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>$this->title</title>
     <meta name="description" content="$this->description">
-    {$renderer->foreach($this->styles, fn(Stylesheet $style) => new Fragment('<link rel="stylesheet" media="{media}" href="{href}">', href: $style->getHref(), media: $style->getMedia()))}
+    {$renderer->foreach($this->styles, fn(Stylesheet $style) => new Fragment('<link rel="stylesheet" href="{href}" media="{media}">', href: $style->getHref(), media: $style->getMedia()))}
     {$renderer->foreach($this->scripts, fn(Script $script) => 
-        new Fragment($script->isModule() ? '<script type="module" src="{src}"></script>' : '<script src="{src}"></script>', src: $script->getSrc()))}
+        new Fragment($script->isModule() ? '<script src="{src}" type="module"></script>' : '<script src="{src}"></script>', src: $script->getSrc()))}
 </head>
 <body>
     {$renderer->render($this->children, $data)}

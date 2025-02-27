@@ -1,7 +1,3 @@
-window.history.replaceState({ url: document.location.href }, '', document.location.href);
-window.addEventListener('popstate', event => {
-    window.location.assign(event.state.url);
-});
 export class Boundary extends HTMLElement {
     constructor() {
         super();
@@ -84,19 +80,23 @@ export class Boundary extends HTMLElement {
         const requestedBase = this.removeLastPathSegment(requestedURL.pathname);
         return requestedURL.host === currentURL.host && requestedBase.startsWith(partial);
     }
-    loadStyle(href) {
-        if (!document.querySelector(`link[href='${href}']`)) {
-            const style = document.createElement('link');
-            style.rel = 'stylesheet';
-            style.href = href;
-            document.head.appendChild(style);
+    loadStyle(style) {
+        if (!document.head.querySelector(`link[href='${style.href}']`)) {
+            const styleElement = document.createElement('link');
+            styleElement.rel = 'stylesheet';
+            styleElement.href = style.href;
+            styleElement.media = style.media;
+            document.head.appendChild(styleElement);
         }
     }
-    loadScript(src) {
-        if (!document.querySelector(`script[src='${src}']`)) {
-            const script = document.createElement('script');
-            script.src = src;
-            document.head.appendChild(script);
+    loadScript(script) {
+        if (!document.head.querySelector(`script[src='${script.src}']`)) {
+            const scriptElement = document.createElement('script');
+            scriptElement.src = script.src;
+            if (script.module) {
+                scriptElement.type = 'module';
+            }
+            document.head.appendChild(scriptElement);
         }
     }
     fetch(url, history, fallback = true) {
@@ -115,12 +115,14 @@ export class Boundary extends HTMLElement {
             const script = wrapper.querySelector('script');
             if (script) {
                 const data = JSON.parse(script.innerText);
+                const scriptSet = new Set(data.scripts.map(s => s.src));
+                const styleSet = new Set(data.styles.map(s => s.href));
                 document.head.querySelectorAll('script').forEach((script) => {
                     if (!script.src) {
                         return;
                     }
                     const url = new URL(script.src, document.baseURI);
-                    if (!script.src.endsWith('.runtime.js') && !data.scripts.includes(url.pathname)) {
+                    if (!scriptSet.has(url.pathname)) {
                         script.remove();
                     }
                 });
@@ -130,7 +132,7 @@ export class Boundary extends HTMLElement {
                         return;
                     }
                     const url = new URL(link.href, document.baseURI);
-                    if (!link.href.endsWith('.reset.css') && !data.styles.includes(url.pathname)) {
+                    if (!styleSet.has(url.pathname)) {
                         link.remove();
                     }
                 });
@@ -160,5 +162,9 @@ export class Boundary extends HTMLElement {
     }
 }
 if (!customElements.get('route-layer')) {
+    window.history.replaceState({ url: document.location.href }, '', document.location.href);
+    window.addEventListener('popstate', event => {
+        window.location.assign(event.state.url);
+    });
     customElements.define('route-layer', Boundary);
 }

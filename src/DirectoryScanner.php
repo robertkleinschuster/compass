@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Compass;
 
+use Compass\Attributes\Stylesheet;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -12,19 +13,15 @@ use SplFileInfo;
 
 readonly class DirectoryScanner
 {
-    private AttributesFactory $pageInfoFactory;
+    private EntrypointFactory $entrypointFactory;
 
     public function __construct(
         private string $pageFilename,
-        private string $pageStylesheetFilename,
-        private string $pageScriptFilename,
         private string $layoutFilename,
-        private string $layoutStylesheetFilename,
-        private string $layoutScriptFilename,
         private string $actionFilename,
     )
     {
-        $this->pageInfoFactory = new AttributesFactory();
+        $this->entrypointFactory = new EntrypointFactory();
     }
 
     /**
@@ -34,13 +31,9 @@ readonly class DirectoryScanner
      */
     public function scan(array $directories): array
     {
-        $pages = [];
-        $layouts = [];
-        $layoutStylesheets = [];
-        $layoutScripts = [];
-        $actions = [];
-        $pageStylesheets = [];
-        $pageScripts = [];
+        $pageFiles = [];
+        $layoutFiles = [];
+        $actionFiles = [];
         $paths = [];
 
         foreach ($directories as $directory) {
@@ -55,27 +48,20 @@ readonly class DirectoryScanner
             /** @var SplFileInfo $item */
             foreach ($iterator as $item) {
                 $path = substr($item->getPath(), strlen($directory));
+                if ($path === '') {
+                    $path = '/';
+                } else {
+                    $path = implode('/', explode(DIRECTORY_SEPARATOR, $path));
+                }
                 $paths[$path] = $path;
                 if ($item->getFilename() === $this->pageFilename) {
-                    $pages[$path] = $item->getPathname();
-                }
-                if ($item->getFilename() === $this->pageStylesheetFilename) {
-                    $pageStylesheets[$path] = $item->getPathname();
-                }
-                if ($item->getFilename() === $this->pageScriptFilename) {
-                    $pageScripts[$path] = $item->getPathname();
+                    $pageFiles[$path] = $item->getPathname();
                 }
                 if ($item->getFilename() === $this->layoutFilename) {
-                    $layouts[$path] = $item->getPathname();
-                }
-                if ($item->getFilename() === $this->layoutStylesheetFilename) {
-                    $layoutStylesheets[$path] = $item->getPathname();
-                }
-                if ($item->getFilename() === $this->layoutScriptFilename) {
-                    $layoutScripts[$path] = $item->getPathname();
+                    $layoutFiles[$path] = $item->getPathname();
                 }
                 if ($item->getFilename() === $this->actionFilename) {
-                    $actions[$path] = $item->getPathname();
+                    $actionFiles[$path] = $item->getPathname();
                 }
             }
         }
@@ -89,81 +75,43 @@ readonly class DirectoryScanner
 
         $results = [];
 
-        foreach ($paths as $i => $path) {
-            $pageFile = $pages[$path] ?? null;
-            $pageScriptFile = $pageScripts[$path] ?? null;
-            $pageStylesheetFile = $pageStylesheets[$path] ?? null;
-            $layoutFile = $layouts[$path] ?? null;
-            $layoutStylesheetFile = $layoutStylesheets[$path] ?? null;
-            $layoutScriptFile = $layoutScripts[$path] ?? null;
-            $actionFile = $actions[$path] ?? null;
+        foreach ($paths as $path) {
+            $parts = explode('/', $path);
 
-            $pageStylesheetPath = $this->buildAssetPath($pageStylesheetFile, $path, 'css');
-            $pageScriptPath = $this->buildAssetPath($pageScriptFile, $path, 'js');
-            $layoutStylesheetPath = $this->buildAssetPath($layoutStylesheetFile, $path, 'css');
-            $layoutScriptPath = $this->buildAssetPath($layoutScriptFile, $path, 'js');
-            $pageAttributes = isset($pageFile) ? $this->pageInfoFactory->create(require $pageFile) : null;
-            $layoutAttributes = isset($layoutFile) ? $this->pageInfoFactory->create(require $layoutFile) : null;
+            /** @var null|PageRoute $layout */
+            $layout = null;
+            $layoutPath = '/';
+            do {
+                $layoutPath = rtrim($layoutPath, '/') . '/' . array_shift($parts);
+                if (isset($layoutFiles[$layoutPath])) {
+                    if ($layout === null) {
+                        $layout = $this->entrypointFactory->createLayout(
+                            file: $layoutFiles[$layoutPath],
+                            path: $layoutPath
+                        );
+                    } else {
+                        $layout = $this->entrypointFactory->createNestedLayout(
+                            file: $layoutFiles[$layoutPath],
+                            path: $layoutPath,
+                            layout: $layout
+                        );
+                    }
+                }
+            } while ($layoutPath !== $path);
 
-            if ($path === '') {
-                $path = '/';
-                $results[$path] = new Route(
-                    path: $path,
-                    pageFile: $pageFile,
-                    pageAttributes: $pageAttributes,
-                    pageStylesheetFile: $pageStylesheetFile,
-                    pageStylesheetPath: $pageStylesheetPath,
-                    pageScriptFile: $pageScriptFile,
-                    pageScriptPath: $pageScriptPath,
-                    layoutFile: $layoutFile,
-                    layoutAttributes: $layoutAttributes,
-                    layoutStylesheetFile: $layoutStylesheetFile,
-                    layoutStylesheetPath: $layoutStylesheetPath,
-                    layoutScriptFile: $layoutScriptFile,
-                    layoutScriptPath: $layoutScriptPath,
-                    actionFile: $actionFile
-                );
-            } else {
-                $path = implode('/', explode(DIRECTORY_SEPARATOR, $path));
-                $parentLevels = 1;
-
-                do {
-                    $parentPath = dirname($path, $parentLevels);
-                    $parentLevels++;
-                } while (!isset($results[$parentPath]) && $parentPath !== '/');
-
-                $results[$path] = new Route(
-                    path: $path,
-                    parent: $results[$parentPath] ?? null,
-                    pageFile: $pageFile,
-                    pageAttributes: $pageAttributes,
-                    pageStylesheetFile: $pageStylesheetFile,
-                    pageStylesheetPath: $pageStylesheetPath,
-                    pageScriptFile: $pageScriptFile,
-                    pageScriptPath: $pageScriptPath,
-                    layoutFile: $layoutFile,
-                    layoutAttributes: $layoutAttributes,
-                    layoutStylesheetFile: $layoutStylesheetFile,
-                    layoutStylesheetPath: $layoutStylesheetPath,
-                    layoutScriptFile: $layoutScriptFile,
-                    layoutScriptPath: $layoutScriptPath,
-                    actionFile: $actionFile
-                );
+            $page = null;
+            if (isset($pageFiles[$path])) {
+                $page = $this->entrypointFactory->createPage($pageFiles[$path], $layout);
             }
+
+            $results[$path] = new Route(
+                path: $path,
+                page: $page,
+                actionFile: $actionFiles[$path] ?? null
+            );
         }
 
 
         return array_values($results);
-    }
-
-    private function buildAssetPath(?string $asset, string $path, string $extension): ?string
-    {
-        if ($asset !== null) {
-            $hash = hash_file('crc32c', $asset);
-            if ($hash !== '00000000') {
-                return "$path/$hash.$extension";
-            }
-        }
-        return null;
     }
 }

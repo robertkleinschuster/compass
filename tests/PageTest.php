@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace CompassTest;
 
-use Compass\AttributesFactory;
-use Mosaic\Renderer;
+use Compass\EntrypointFactory;
 use Compass\Route;
-use Compass\Page;
+use Compass\Templates\Page;
+use Mosaic\Renderer;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -16,10 +16,11 @@ class PageTest extends TestCase
     #[Test]
     public function testRender()
     {
-        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
-        $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
-        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
-        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/renderer/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/renderer/sub/child/layout.php');
+        $entrypointFactory = new EntrypointFactory();
+        $layout = $entrypointFactory->createLayout(__DIR__ . '/renderer/layout.php', '/');
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/renderer/sub/layout.php', '/sub', $layout);
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/renderer/sub/child/layout.php', '/sub/child', $layout);
+        $child = new Route(path: '/sub/child', page: $entrypointFactory->createPage(__DIR__ . '/renderer/sub/child/page.php', $layout));
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
@@ -29,9 +30,9 @@ class PageTest extends TestCase
     #[Test]
     public function testRenderNoLayout()
     {
-        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer-no-layout/page.php');
+        $entrypointFactory = new EntrypointFactory();
 
-        $root = new Route('', null, __DIR__ . '/renderer-no-layout/page.php', pageAttributes: $pageInfo);
+        $root = new Route('/', $entrypointFactory->createPage(__DIR__ . '/renderer-no-layout/page.php', null));
 
         $renderer = new Renderer();
         $result = $renderer->render(new Page($root, '/sub/child', ['id' => '1'], []));
@@ -41,11 +42,12 @@ class PageTest extends TestCase
     #[Test]
     public function testRenderPartial()
     {
-        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/renderer/sub/child/page.php');
+        $entrypointFactory = new EntrypointFactory();
 
-        $root = new Route(path: '/', pageFile: __DIR__ . '/renderer/page.php', layoutFile: __DIR__ . '/renderer/layout.php');
-        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/renderer/sub/page.php', layoutFile: __DIR__ . '/renderer/sub/layout.php');
-        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/renderer/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/renderer/sub/child/layout.php');
+        $layout = $entrypointFactory->createLayout(__DIR__ . '/renderer/layout.php', '/');
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/renderer/sub/layout.php', '/sub', $layout);
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/renderer/sub/child/layout.php', '/sub/child', $layout);
+        $child = new Route(path: '/sub/child', page: $entrypointFactory->createPage(__DIR__ . '/renderer/sub/child/page.php', $layout));
 
         $renderer = new Renderer();
 
@@ -65,11 +67,14 @@ class PageTest extends TestCase
     #[Test]
     public function testRenderLazy()
     {
-        $pageInfo = (new AttributesFactory())->create(require __DIR__ . '/lazy/sub/child/page.php');
+        $entrypointFactory = new EntrypointFactory();
 
-        $root = new Route(path: '/', pageFile: __DIR__ . '/lazy/page.php', layoutFile: __DIR__ . '/lazy/layout.php');
-        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/lazy/sub/page.php', layoutFile: __DIR__ . '/lazy/sub/layout.php');
-        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/lazy/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/lazy/sub/child/layout.php');
+        $layout = $entrypointFactory->createLayout(__DIR__ . '/lazy/layout.php', '/');
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/lazy/sub/layout.php', '/sub', $layout);
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/lazy/sub/child/layout.php', '/sub/child', $layout);
+        $child = new Route(path: '/sub/child', page: $entrypointFactory->createPage(__DIR__ . '/lazy/sub/child/page.php', $layout));
+
+
 
         $renderer = new Renderer();
 
@@ -79,9 +84,10 @@ class PageTest extends TestCase
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], ['_partial' => '/sub']));
         $this->assertStringContainsString('<template data-title=""><sub><child id="1">page 1 /sub/child</child></sub></template>', (string)$result);
 
-        $root = new Route(path: '/', pageFile: __DIR__ . '/lazy/page.php', layoutFile: __DIR__ . '/lazy/layout.php');
-        $sub = new Route(path: '/sub', parent: $root, pageFile: __DIR__ . '/lazy/sub/page.php');
-        $child = new Route(path: '/sub/child', parent: $sub, pageFile: __DIR__ . '/lazy/sub/child/page.php', pageAttributes: $pageInfo, layoutFile: __DIR__ . '/lazy/sub/child/layout.php');
+        $layout = $entrypointFactory->createLayout(__DIR__ . '/lazy/layout.php', '/');
+        $layout = $entrypointFactory->createNestedLayout(__DIR__ . '/lazy/sub/child/layout.php', '/sub/child', $layout);
+        $child = new Route(path: '/sub/child', page: $entrypointFactory->createPage(__DIR__ . '/lazy/sub/child/page.php', $layout));
+
 
         $result = $renderer->render(new Page($child, '/sub/child', ['id' => '1'], []));
         $this->assertStringContainsString('<root><child id="1"><route-layer partial="." fetch-on-connected></route-layer></child></root>', (string)$result);

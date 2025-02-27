@@ -8,11 +8,10 @@ use Compass\Attributes\MetaInfo;
 use Compass\Attributes\Script;
 use Compass\Attributes\Stylesheet;
 use Compass\Attributes\Reactive;
-use Compass\Attributes\Resource;
 use Mosaic\AttributeHelper;
 use ReflectionException;
 
-class AttributesFactory
+class EntrypointFactory
 {
     private AttributeHelper $attributeHelper;
 
@@ -23,21 +22,67 @@ class AttributesFactory
     }
 
     /**
-     * @param mixed $page
-     * @return Attributes
+     * @param string $file
+     * @return PageRoute
      * @throws ReflectionException
      */
-    public function create(mixed $page): Attributes
+    public function createPage(string $file, ?Layout $layout): PageRoute
     {
-        $attributes = $this->attributeHelper->getAttributes($page);
-        return new Attributes(
+        $attributes = $this->attributeHelper->getAttributes(require $file);
+        return new PageRoute(
+            file: $file,
+            partials: $layout?->getPartials() ?? [],
+            layoutFiles: $layout?->getFiles() ?? [],
+            headers: array_merge($layout?->getHeaders() ?? [], $this->getHeaders($attributes)),
+            meta: $this->getMeta($attributes) ?? $layout?->getMeta(),
+            styles: array_merge($layout?->getStyles() ?? [new Stylesheet(__DIR__ . '/reset.css')], $this->getStyles($attributes)),
+            scripts: array_merge($layout?->getScripts() ?? [], $this->getScripts($attributes)),
+            lazy: $this->getLazy($attributes) ?? $layout?->getLazy(),
+            reactive: $this->getReactive($attributes) ?? $layout?->getReactive(),
+        );
+    }
+
+
+    /**
+     * @param string $file
+     * @param string $path
+     * @return Layout
+     * @throws ReflectionException
+     */
+    public function createLayout(string $file, string $path): Layout
+    {
+        $attributes = $this->attributeHelper->getAttributes(require $file);
+        return new Layout(
+            files: [$file],
+            partials: [$path],
             headers: $this->getHeaders($attributes),
             meta: $this->getMeta($attributes),
-            styles: $this->getStyles($attributes),
-            scripts: $this->getScripts($attributes),
+            styles: [new Stylesheet(__DIR__ . '/reset.css'), ...$this->getStyles($attributes)],
+            scripts: [new Script(__DIR__ . '/runtime.js'), ...$this->getScripts($attributes)],
             lazy: $this->getLazy($attributes),
-            resource: $this->getResource($attributes),
-            reactive: $this->getReactive($attributes)
+            reactive: $this->getReactive($attributes),
+        );
+    }
+
+    /**
+     * @param string $file
+     * @param string $path
+     * @param Layout $layout
+     * @return Layout
+     * @throws ReflectionException
+     */
+    public function createNestedLayout(string $file, string $path, Layout $layout): Layout
+    {
+        $attributes = $this->attributeHelper->getAttributes(require $file);
+        return new Layout(
+            files: array_merge([$file], $layout->getFiles()),
+            partials: array_merge([$path], $layout->getPartials()),
+            headers: array_merge($layout->getHeaders(), $this->getHeaders($attributes)),
+            meta: $this->getMeta($attributes),
+            styles: array_merge($layout->getStyles(), $this->getStyles($attributes)),
+            scripts: array_merge($layout->getScripts(), $this->getScripts($attributes)),
+            lazy: $this->getLazy($attributes),
+            reactive: $this->getReactive($attributes),
         );
     }
 
@@ -102,21 +147,6 @@ class AttributesFactory
         }
 
         return $styles;
-    }
-
-    /**
-     * @param object[] $attributes
-     * @return Resource|null
-     */
-    private function getResource(array $attributes): ?Resource
-    {
-        foreach ($attributes as $attribute) {
-            if ($attribute instanceof Resource) {
-                return $attribute;
-            }
-        }
-        return null;
-
     }
 
     /**

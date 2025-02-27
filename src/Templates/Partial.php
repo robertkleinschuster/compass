@@ -27,17 +27,10 @@ class Partial implements Renderable
 
     public function render(Renderer $renderer, mixed $data)
     {
-        $assets = [
-            'scripts' => [],
-            'styles' => []
-        ];
-        foreach ($this->scripts as $script) {
-            $assets['scripts'][] = $script->getSrc();
-        }
-        foreach ($this->styles as $style) {
-            $assets['styles'][] = $style->getHref();
-        }
-        $assets = json_encode($assets);
+        $assets = json_encode([
+            'scripts' => $this->scripts,
+            'styles' => $this->styles
+        ]);
         $title = htmlentities($this->title);
         yield new Fragment(<<<HTML
 <template data-title="$title">{$renderer->render($this->children, $data)}</template>

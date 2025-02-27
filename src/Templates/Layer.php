@@ -9,7 +9,6 @@ use Mosaic\Renderer;
 
 readonly class Layer implements Renderable
 {
-    public const string SCRIPT_PATH = '/.runtime.js';
     public const string CONTENT_ONLY_PARTIAL = '.';
 
     public function __construct(
